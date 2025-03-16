@@ -5,6 +5,7 @@ import routerAccount from "./routes/account.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import accountModel from "./models/account.model.js";
+import cookieParser from "cookie-parser";
 const app = express();
 dotenv.config();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -21,7 +22,9 @@ async function main() {
       credentials: true,
     })
   );
-
+  app.use(cookieParser());
+  // node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  app.use(routerAccount);
   app.use(handleError);
   app.use(handleNotFound);
 }

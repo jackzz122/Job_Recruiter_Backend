@@ -1,6 +1,5 @@
 import comment from "./comment.controller";
 
-export const getComments = async () => {};
 export const createComment = async (req, res, next) => {
   try {
     const { body } = req;
@@ -8,7 +7,7 @@ export const createComment = async (req, res, next) => {
     next(err);
   }
 };
-export const getDetailsComment = async (req, res, next) => {
+export const getCommentCompanies = async (req, res, next) => {
   try {
     const { body } = req;
   } catch (err) {
