@@ -3,16 +3,29 @@ import {
   createComment,
   DeleteComment,
   getCommentCompanies,
-} from "../controller/comment.controller";
-import { checkTokenAuthen } from "../middleware/checkTokenAuthen";
-import { checkRoles } from "../middleware/checkRoles";
+} from "../controller/comment.controller.js";
+import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
+import { checkRoles } from "../middleware/checkRoles.js";
+import { RoleName } from "../models/account.model.js";
 const router = express.Router();
 
-router.get("/api/comments/:companyId", getCommentCompanies);
-router.post("/api/createdComment", checkTokenAuthen, createComment);
-router.delete(
-  "/api/deleteComment",
+router.get(
+  "/api/company/comments/:companyId",
   checkTokenAuthen,
-  checkRoles(["admin"]),
+  checkRoles([RoleName.STAFF_RECRUIT, RoleName.GUEST]),
+  getCommentCompanies
+);
+router.post(
+  "/api/reatedComment",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  createComment
+);
+router.delete(
+  "/api/deleteComment/:commentId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
   DeleteComment
 );
+
+export default router;

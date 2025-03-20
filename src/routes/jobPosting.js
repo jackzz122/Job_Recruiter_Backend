@@ -1,29 +1,45 @@
 import express from "express";
 import {
+  createJobPosting,
   deleteJobPosting,
+  getAllJobPostings,
   getJobPostingList,
   updateJobPosting,
 } from "../controller/jobPosting.controller";
-import { checkTokenAuthen } from "../middleware/checkTokenAuthen";
-import { checkRoles } from "../middleware/checkRoles";
+import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
+import { checkRoles } from "../middleware/checkRoles.js";
+import { RoleName } from "../models/account.model.js";
 const router = express.Router();
 
 router.get(
-  "/api/getJobPostingList",
+  "/api/getAllJobPosting",
   checkTokenAuthen,
-  checkRoles(["staff", "admin"]),
+  checkRoles(["admin"]),
+  getAllJobPostings
+);
+
+router.get(
+  "/api/jobPostingList/:companyId",
+  checkTokenAuthen,
+  checkRoles([RoleName.STAFF, RoleName.ADMIN]),
   getJobPostingList
 );
-router.update(
-  "/api/updateJobPosting/:id",
+router.post(
+  "/api/staff/createJobPosting",
   checkTokenAuthen,
-  checkRoles(["staff"]),
+  checkRoles([RoleName.STAFF]),
+  createJobPosting
+);
+router.update(
+  "/api/updateJobPosting/:jobPostingId",
+  checkTokenAuthen,
+  checkRoles([RoleName.STAFF]),
   updateJobPosting
 );
 router.delete(
-  "/api/deleteJobPosting/:id",
+  "/api/deleteJobPosting/:jobPostingId",
   checkTokenAuthen,
-  checkRoles(["staff", "admin"]),
+  checkRoles([RoleName.STAFF, RoleName.STAFF_RECRUIT, RoleName.ADMIN]),
   deleteJobPosting
 );
 

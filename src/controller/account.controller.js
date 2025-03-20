@@ -1,11 +1,13 @@
 import account from "../models/account.model.js";
+import company from "../models/companyInfor.model.js"
+import jobPosting from "../models/jobPosting.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import * as _ from "lodash";
 import { matchedData, validationResult } from "express-validator";
 const maxAge = 3 * 24 * 60 * 60;
-const createToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: maxAge });
+const createToken = (user) => {
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: maxAge });
 };
 
 const comparePassword = (password, hasPash) => {
@@ -19,7 +21,7 @@ export const createUser = async (req, res, next) => {
 
     if (existAccount) {
       return res.status(400).json({
-        message: "Account existed",
+        message: "Account existeds",
       });
     }
 
@@ -60,7 +62,8 @@ export const loginUser = async (req, res, next) => {
         .status(404)
         .json({ message: "Email or password was incorrect" });
     }
-    const token = createToken(findUser._id);
+
+    const token = createToken(findUser);
     res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
     return res.json({ message: "Account founded" });
   } catch (err) {
@@ -68,12 +71,36 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-export const updateUser = async (req, res, next) => {
-  const userId = req.userId;
-  const { body } = req;
-  const findUser = await account.findOne({ _id: userId });
-  res.json(findUser);
+export const forgotPassword = async (req, res , next) => {
+  try{
+    
+  }catch(err) {
+    next(err);
+  }
+}
+
+export const getListUsers = async (req, res, next) => {
+  try {
+    const listAccount = await account.find({}, {password: 0});
+    if(listAccount.length === 0) return res.status(404).json({message: "None user found"});
+    return res.json(listAccount)
+  } catch (err) {
+    next(err);
+  }
 };
+
+//! Update User
+export const updateUser = async (req, res, next) => {
+  try{
+    const userId = req.userId;
+    const findUser = await account.findOne({ _id: userId });
+
+  }catch(err){
+    next(err);
+  }
+};
+
+// ! Delete user
 
 export const deleteUser = async (req, res, next) => {
   try {
@@ -85,6 +112,37 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
-export const companyFavourite = (req, res, next) => {};
 
-export const jobFavourite = (req, res, next) => {};
+// ! Company Favourite
+export const companyFavourite = async (req, res, next) => {
+  try{
+    const userId = req.userId;
+    const companyId = req.params.companyID;
+    const findCompany = await company.find({_id: companyId});
+    if(findCompany.length === 0) return res.status(404).json({message: "Not found company"});
+    const findUser = await account.find({_id: userId});
+    
+    findUser.listFavouritesCompanyID.push(companyId);
+    await findUser.save();
+    return res.json({message: "Add favourite successfull"});
+  }catch(err) {
+    next(err);
+  }
+};
+
+
+// ! Job Favourite
+export const jobFavourite =async (req, res, next) => {
+  try{
+    const userId = req.userId;
+    const jobId = req.params.jobPostingID;
+    const findJobPosting = await jobPosting.find({_id: jobId});
+    if(findJobPosting.length === 0) return res.status(404).json({message: "Not found job posting"});
+    const findUser = await account.find({_id: userId});
+    findUser.listFavouritesJobsID.push(jobId);
+    await findUser.save();
+    return res.json({message: "Add job favourite successfull"});
+  }catch(err){
+    next(err);
+  }
+};

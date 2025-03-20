@@ -1,16 +1,45 @@
-import pendingApprove from "../models/pendingApprove";
-import account from "../models/account.model";
-export const getPendingList = (req, res, next) => {};
+import pendingApprove from "../models/pendingApprove.js";
+import account from "../models/account.model.js";
+import { RoleName } from "../models/account.model.js";
+import company from "../models/companyInfor.model.js"
+export const getPendingList = async (req, res, next) => {
+  try {
+    const pendingList = await pendingApprove.find();
+    if (pendingList.length === 0)
+      return res.status(404).json({ message: "pending list not found" });
+    return res.json(pendingList);
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const addPendingList = async (req, res, next) => {
-  const userId = req.userId;
-  const findUser = await account.findOne({ _id: userId });
-  if (!findUser) {
-    return res.status(404).json({ message: "Account not found" });
+  try {
+    const userId = req.userId;
+    const newCompany = new company({
+      ...req.body
+    })
+    await newCompany.save();
+    const findUser = await account.findOne({ _id: userId });
+    if (!findUser) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+    findUser.role = RoleName.Recruit;
+    findUser.companyId = newCompany._id;
+    await findUser.save();
+    return res.json({message: "Company created successfully"})
+  } catch (err) {
+    next(err);
   }
-  if (findUser.role !== "guest") {
-    return res.status(404).json({ message: "You must create account first" });
+};
+export const deletePendingItems = async (req, res, next) => {
+  try {
+    const id = req.params.pendingItemsId;
+    await pendingApprove.deleteOne({ _id: id });
+    return res
+      .status(204)
+      .json({ message: "Pending items deleted successfully" });
+  } catch (err) {
+    next(err);
   }
-
-  const { body } = req;
 };

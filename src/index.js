@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { handleError, handleNotFound } from "./middleware/handleError.js";
 import routerAccount from "./routes/account.js";
+import routerComment from "./routes/comment.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import accountModel from "./models/account.model.js";
@@ -24,6 +25,7 @@ async function main() {
   );
   app.use(cookieParser());
   // node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  app.use(routerComment);
   app.use(routerAccount);
   app.use(handleError);
   app.use(handleNotFound);

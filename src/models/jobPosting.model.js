@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema;
 const jobPostingSchema = new mongoose.Schema({
-  account_HR_ID: {
+  account_staff_id: {
     type: ObjectId,
     ref: "account",
   },
@@ -35,5 +35,9 @@ const jobPostingSchema = new mongoose.Schema({
   listAccountId: {
     type: Array,
   },
+  createdAt: {
+    type: Date,
+    default: () => Date.now()
+  }
 });
 export default mongoose.model("jobPosting", jobPostingSchema);

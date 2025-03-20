@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema;
 export const RoleName = {
   ADMIN: "admin",
-  STAFF: "staff",
+  Recruit : "recruit",
+  STAFF_RECRUIT: "staffRecruit",
   GUEST: "guest",
 };
 
@@ -72,10 +73,10 @@ const account = new mongoose.Schema(
     linkingProfile: {
       type: String,
     },
-    listFavouritesID: {
+    listFavouritesCompanyID: {
       type: Array,
     },
-    listFavouritesIDArray: {
+    listFavouritesJobsID: {
       type: Array,
     },
   },

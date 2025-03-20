@@ -26,6 +26,10 @@ const pendingApproveSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  addedTime: {
+    type: Date,
+    default: () => Date.now()
+  }
 });
 
 export default mongoose.model("pending_approve", pendingApproveSchema);
