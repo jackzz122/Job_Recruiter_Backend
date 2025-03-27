@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema;
 export const RoleName = {
   ADMIN: "admin",
-  Recruit : "recruit",
+  Recruit: "recruit",
   STAFF_RECRUIT: "staffRecruit",
   GUEST: "guest",
 };

@@ -9,7 +9,10 @@ import {
 } from "../controller/account.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkSchema } from "express-validator";
-import { accountValidator } from "../middleware/accountValidator.js";
+import {
+  accountRegisterValidator,
+  accountValidator,
+} from "../middleware/accountValidator.js";
 import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
 const router = express.Router();
@@ -17,13 +20,11 @@ const router = express.Router();
 router.post("/api/loginAccount", checkSchema(accountValidator), loginUser);
 router.post(
   "/api/createAccount",
-  checkTokenAuthen,
-  checkRoles([RoleName.GUEST, RoleName.STAFF_RECRUIT]),
+  checkSchema(accountRegisterValidator),
   createUser
 );
 router.put(
   "/api/updateAccount",
-  checkTokenAuthen,
   checkTokenAuthen,
   checkRoles([RoleName.GUEST, RoleName.STAFF_RECRUIT, RoleName.Recruit]),
   updateUser
