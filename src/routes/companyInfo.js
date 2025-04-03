@@ -6,6 +6,7 @@ import { RoleName } from "../models/account.model.js";
 import {
   createAccountStaff,
   createCompanyInfo,
+  deleteAccountStaff,
   deleteCompanyInfo,
   getCompanyInfo,
   updateCompanyInfo,
@@ -13,10 +14,21 @@ import {
 router.get(
   "/api/companyInfo/:companyId",
   checkTokenAuthen,
-  checkRoles([RoleName.STAFF_RECRUIT,, RoleName.STAFF_RECRUIT, RoleName.GUEST, RoleName.ADMIN]),
+  checkRoles([
+    RoleName.STAFF_RECRUIT,
+    ,
+    RoleName.STAFF_RECRUIT,
+    RoleName.GUEST,
+    RoleName.ADMIN,
+  ]),
   getCompanyInfo
 );
-router.post("/api/staff/createStaff", checkTokenAuthen, checkRoles([RoleName.Recruit]), createAccountStaff)
+router.post(
+  "/api/createStaff",
+  checkTokenAuthen,
+  checkRoles([RoleName.Recruit]),
+  createAccountStaff
+);
 router.post(
   "/api/createCompany",
   checkTokenAuthen,
@@ -26,6 +38,11 @@ router.put(
   "/api/updateCompany",
   checkTokenAuthen,
   checkRoles([RoleName.Recruit], updateCompanyInfo)
+);
+router.delete(
+  "/api/deleteStaffAccount",
+  checkTokenAuthen,
+  checkRoles([RoleName.Recruit], deleteAccountStaff)
 );
 router.delete(
   "/api/deleteCompany",

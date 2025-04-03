@@ -6,30 +6,31 @@ const pendingApproveSchema = new mongoose.Schema({
     type: ObjectId,
     ref: "account",
   },
-  nameCompoany: {
+  companyName: {
     type: String,
     required: true,
   },
-  logo: {
+  phoneNumber: {
     type: String,
     required: true,
   },
-  years: {
+  address: {
     type: String,
     required: true,
   },
-  description: {
+  websiteUrl: {
     type: String,
     required: true,
   },
-  sizing: {
-    type: Number,
-    required: true,
+  status: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "inactive",
   },
-  addedTime: {
+  createdAt: {
     type: Date,
-    default: () => Date.now()
-  }
+    default: () => Date.now(),
+  },
 });
 
 export default mongoose.model("pending_approve", pendingApproveSchema);

@@ -1,28 +1,29 @@
 import express from "express";
 import {
-  addPendingList,
+  confirmPendingItem,
+  deletePendingItems,
   getPendingList,
 } from "../controller/pendingApprove.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkRoles } from "../middleware/checkRoles.js";
-import { RoleName } from "../models/account.model";
+import { RoleName } from "../models/account.model.js";
 const router = express.Router();
 
 router.get(
-  "/api/admin/getPendingList",
+  "/api/getPendingList",
   checkTokenAuthen,
   checkRoles([RoleName.ADMIN]),
   getPendingList
 );
 router.post(
-  "/api/addPendingApprove",
+  "/api/confirmPendingItem/:userId",
   checkTokenAuthen,
-  checkRoles([RoleName.GUEST]),
-  addPendingList
+  checkRoles([RoleName.ADMIN]),
+  confirmPendingItem
 );
 router.delete(
-  "/api/admin/deletePendingApprove/:pendingItemsId",
+  "/api/deletePendingApprove/:pendingItemsId",
   checkTokenAuthen,
-  checkRoles([RoleName.ADMIN])
+  checkRoles([RoleName.ADMIN], deletePendingItems)
 );
 export default router;

@@ -68,7 +68,7 @@ const account = new mongoose.Schema(
     },
     companyId: {
       type: ObjectId,
-      ref: "company",
+      ref: "companyInfo",
     },
     linkingProfile: {
       type: String,

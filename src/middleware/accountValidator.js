@@ -25,3 +25,22 @@ export const accountRegisterValidator = {
     },
   },
 };
+export const recruiterRegisValidator = {
+  companyName: {
+    errorMessage: "Please enter a company name",
+  },
+  email: {
+    isEmail: {
+      errorMessage: "Please enter a valid email address",
+    },
+  },
+  phoneNumber: {
+    errorMessage: "Please enter a phone number",
+  },
+  address: {
+    errorMessage: "Please enter a address",
+  },
+  websiteUrl: {
+    errorMessage: "Please enter a website url",
+  },
+};

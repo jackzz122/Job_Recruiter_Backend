@@ -1,30 +1,53 @@
 import mongoose from "mongoose";
-
+const { ObjectId } = mongoose.Schema;
 const companyInfoSchema = new mongoose.Schema({
-  nameCompany: {
+  accountID: {
+    type: ObjectId,
+    ref: "account",
+  },
+  companyName: {
     type: String,
     required: true,
+  },
+  websiteUrl: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  emailCompany: {
+    type: String,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  phoneNumberCompany: {
+    type: String,
   },
   logo: {
     type: String,
-    required: true,
   },
   years: {
     type: Number,
-    required: true,
   },
   description: {
     type: Array,
-    required: true,
   },
   sizing: {
     type: Number,
-    required: true,
   },
+
   createdAt: {
     type: Date,
     default: () => Date.now(),
-  }
+  },
 });
 
 export default mongoose.model("companyInfo", companyInfoSchema);

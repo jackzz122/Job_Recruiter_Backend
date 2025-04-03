@@ -46,9 +46,22 @@ export const createAccountStaff = async (req, res, next) => {
     const newAccountStaff = new account({
       ...req.body,
       role: RoleName.STAFF_RECRUIT,
-    })
+    });
     await newAccountStaff.save();
-    return res.status(201).json({message: "Create account success"})
+    return res.status(201).json({ message: "Create account success" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteAccountStaff = async (req, res, next) => {
+  try {
+    const id = req.params.userId;
+    const findAccount = await account.findOne({ _id: id });
+    if (!findAccount) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+    return res.json({ message: "Delete successfully" });
   } catch (err) {
     next(err);
   }

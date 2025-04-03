@@ -5,8 +5,7 @@ export const checkTokenAuthen = (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) return err.status(401).json({ auth: err.message });
       else {
-        req.userId = decoded.id;
-        req.role = decoded.role;
+        req.user = decoded.user;
         next();
       }
     });
