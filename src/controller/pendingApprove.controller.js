@@ -22,6 +22,11 @@ export const confirmPendingItem = async (req, res, next) => {
     if (!findUser) {
       return res.status(404).json({ message: "Account not found" });
     }
+    const pendingItem = await pendingApprove.findOne({
+      accountID: req.params.userId,
+    });
+    pendingItem.status = status.APPROVE;
+    await pendingItem.save();
     const newCompany = new company({
       ...req.body,
     });
@@ -29,11 +34,6 @@ export const confirmPendingItem = async (req, res, next) => {
     findUser.role = RoleName.Recruit;
     findUser.companyId = newCompany._id;
     await findUser.save();
-    const pendingItem = await pendingApprove.findOne({
-      accountID: req.params.userId,
-    });
-    pendingApprove.status = status.APPROVE;
-    await pendingItem.save();
     return res.json({ message: "Company created successfully" });
   } catch (err) {
     next(err);
@@ -48,9 +48,25 @@ export const blockPendingItem = async (req, res, next) => {
     const pendingItem = await pendingApprove.findOne({
       accountID: req.params.userId,
     });
-    pendingApprove.status = status.BLOCKED;
+    pendingItem.status = status.BLOCKED;
     await pendingItem.save();
     return res.json({ message: "Company blocked successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+export const unBlockPendingItem = async (req, res, next) => {
+  try {
+    const findUser = await account.findOne({ _id: req.params.userId });
+    if (!findUser) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+    const pendingItem = await pendingApprove.findOne({
+      accountID: req.params.userId,
+    });
+    pendingItem.status = status.PENDING;
+    await pendingItem.save();
+    return res.json({ message: "Company unblocked successfully" });
   } catch (err) {
     next(err);
   }

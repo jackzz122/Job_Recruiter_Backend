@@ -67,7 +67,10 @@ export const loginUser = async (req, res, next) => {
         .json({ message: "Email or password was incorrect" });
     }
     const token = createToken(findUser);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: 1000 * maxAge,
+    });
     return res.json({ message: "Account founded" });
   } catch (err) {
     next(err);

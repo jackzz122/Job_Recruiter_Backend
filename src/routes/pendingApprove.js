@@ -28,6 +28,11 @@ router.post(
   checkRoles([RoleName.ADMIN]),
   blockPendingItem
 );
+router.post(
+  "/api/unblockPending/:userId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN])
+);
 router.delete(
   "/api/deletePendingApprove/:pendingItemsId",
   checkTokenAuthen,

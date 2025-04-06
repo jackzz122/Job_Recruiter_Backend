@@ -31,7 +31,7 @@ const pendingApproveSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: Object.values(status),
-    default: "pending",
+    default: status.PENDING,
   },
   createdAt: {
     type: Date,
