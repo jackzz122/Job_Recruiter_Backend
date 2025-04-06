@@ -6,6 +6,11 @@ export const RoleName = {
   STAFF_RECRUIT: "staffRecruit",
   GUEST: "guest",
 };
+export const Gender = {
+  MALE: "male",
+  FEMALE: "female",
+  OTHER: "other",
+};
 
 const account = new mongoose.Schema(
   {
@@ -39,6 +44,7 @@ const account = new mongoose.Schema(
     address: {
       type: String,
       maxLength: 255,
+      default: "",
     },
     password: {
       type: String,
@@ -46,12 +52,15 @@ const account = new mongoose.Schema(
     },
     phone: {
       type: String,
+      default: "",
     },
     gender: {
       type: String,
+      enum: Object.values(Gender),
     },
     avatarIMG: {
       type: String,
+      default: "",
     },
     majorId: {
       type: ObjectId,
@@ -72,6 +81,7 @@ const account = new mongoose.Schema(
     },
     linkingProfile: {
       type: String,
+      default: "",
     },
     listFavouritesCompanyID: {
       type: Array,

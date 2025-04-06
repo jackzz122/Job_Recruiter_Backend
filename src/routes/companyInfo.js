@@ -32,17 +32,20 @@ router.post(
 router.post(
   "/api/createCompany",
   checkTokenAuthen,
-  checkRoles([RoleName.ADMIN], createCompanyInfo)
+  checkRoles([RoleName.ADMIN]),
+  createCompanyInfo
 );
 router.put(
   "/api/updateCompany",
   checkTokenAuthen,
-  checkRoles([RoleName.Recruit], updateCompanyInfo)
+  checkRoles([RoleName.Recruit]),
+  updateCompanyInfo
 );
 router.delete(
-  "/api/deleteStaffAccount",
+  "/api/deleteStaffAccount/:userId",
   checkTokenAuthen,
-  checkRoles([RoleName.Recruit], deleteAccountStaff)
+  checkRoles([RoleName.Recruit]),
+  deleteAccountStaff
 );
 router.delete(
   "/api/deleteCompany",

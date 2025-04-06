@@ -19,14 +19,14 @@ export const createMajorCategory = async (req, res, next) => {
     await newCate.save();
     return res.status(201).json({ message: "Category created successfully" });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };
 export const updateMajorCategory = async (req, res, next) => {
   try {
-    const id = req.params.majorId;
-    const findCate = majorCategories.findById(id);
-    if (!findCate.length) {
+    const findCate = majorCategories.findOne({ _id: req.params.majorId });
+    if (!findCate) {
       return res.status(404).json({ message: "Category not found" });
     }
   } catch (err) {
@@ -35,8 +35,9 @@ export const updateMajorCategory = async (req, res, next) => {
 };
 export const deleteMajorCategory = async (req, res, next) => {
   try {
-    const id = req.params.majorId;
-    await majorCategories.deleteById(id);
+    const findMajor = majorCategories.findOne({ _id: req.params.majorId });
+    if (!findMajor) return res.status(404).json({ message: "Major not found" });
+    await majorCategories.deleteOne({ _id: req.params.majorId });
     return res.status(204).json({ message: "Category deleted successfully" });
   } catch (err) {
     next(err);

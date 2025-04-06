@@ -9,6 +9,17 @@ const companyInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  country: {
+    type: String,
+    default: "",
+  },
+  overTime: {
+    type: Boolean,
+    default: false,
+  },
+  keySkills: {
+    type: Array,
+  },
   websiteUrl: {
     type: String,
     required: true,
@@ -19,6 +30,7 @@ const companyInfoSchema = new mongoose.Schema({
   },
   emailCompany: {
     type: String,
+    default: "",
   },
   address: {
     type: String,
@@ -30,12 +42,15 @@ const companyInfoSchema = new mongoose.Schema({
   },
   phoneNumberCompany: {
     type: String,
+    default: "",
   },
   logo: {
     type: String,
+    default: "",
   },
   years: {
     type: Number,
+    default: 0,
   },
   description: {
     type: Array,

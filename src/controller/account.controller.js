@@ -80,6 +80,15 @@ export const forgotPassword = async (req, res, next) => {
   //   next(err);
   // }
 };
+// ! Logout user
+export const logout = async (req, res, next) => {
+  try {
+    res.cookie("jwt", "", { maxAge: 1 });
+    return res.json({ message: "Logout successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
 // ! Login For Recruiter
 export const LoginRecruiter = async (req, res, next) => {
   try {
@@ -206,6 +215,20 @@ export const getListUsers = async (req, res, next) => {
     if (listAccount.length === 0)
       return res.status(404).json({ message: "None user found" });
     return res.json(listAccount);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getListRecruiter = async (req, res, next) => {
+  try {
+    const listRecruiter = await account.find({
+      role: RoleName.STAFF_RECRUIT,
+      companyId: req.params.companyId,
+    });
+    if (listRecruiter.length === 0)
+      return res.status(404).json({ message: "None user found" });
+    return res.json(listRecruiter);
   } catch (err) {
     next(err);
   }

@@ -7,6 +7,8 @@ const majorCategoriesSchema = new mongoose.Schema({
   },
   level: {
     type: String,
+    required: true,
   },
 });
+majorCategoriesSchema.index({ name: 1, level: 1 }, { unique: true });
 export default mongoose.model("majorCategory", majorCategoriesSchema);

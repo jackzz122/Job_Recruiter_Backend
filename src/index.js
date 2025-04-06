@@ -7,6 +7,7 @@ import routerPending from "./routes/pendingApprove.js";
 import routeCompany from "./routes/companyInfo.js";
 import dotenv from "dotenv";
 import cors from "cors";
+import routeMajors from "./routes/majorCate.js";
 import accountModel from "./models/account.model.js";
 import cookieParser from "cookie-parser";
 const app = express();
@@ -27,10 +28,11 @@ async function main() {
   );
   app.use(cookieParser());
   // node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-  app.use(routerComment);
   app.use(routerAccount);
+  app.use(routerComment);
   app.use(routerPending);
   app.use(routeCompany);
+  app.use(routeMajors);
   app.use(handleError);
   app.use(handleNotFound);
 }

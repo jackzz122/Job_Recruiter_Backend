@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  blockPendingItem,
   confirmPendingItem,
   deletePendingItems,
   getPendingList,
@@ -20,6 +21,12 @@ router.post(
   checkTokenAuthen,
   checkRoles([RoleName.ADMIN]),
   confirmPendingItem
+);
+router.post(
+  "/api/blockPendingItem/:userId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  blockPendingItem
 );
 router.delete(
   "/api/deletePendingApprove/:pendingItemsId",

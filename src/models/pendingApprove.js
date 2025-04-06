@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema;
 
+export const status = {
+  APPROVE: "approve",
+  PENDING: "pending",
+  BLOCKED: "blocked",
+};
+
 const pendingApproveSchema = new mongoose.Schema({
   accountID: {
     type: ObjectId,
@@ -24,8 +30,8 @@ const pendingApproveSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["active", "inactive"],
-    default: "inactive",
+    enum: Object.values(status),
+    default: "pending",
   },
   createdAt: {
     type: Date,

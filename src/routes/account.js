@@ -4,12 +4,15 @@ import {
   companyFavourite,
   createUser,
   deleteUser,
+  getListRecruiter,
+  getListUsers,
   getProfile,
   jobFavourite,
   LoginRecruiter,
   loginUser,
   RegisterRecruiter,
   updateUser,
+  userLogOut,
 } from "../controller/account.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkSchema } from "express-validator";
@@ -46,6 +49,21 @@ router.post(
 //! register for admin
 router.post("/api/adminLogin", checkSchema(accountValidator), adminLogin);
 
+// !Get Profile for Recruiter
+router.get(
+  "/api/getProfileRecruiter",
+  checkTokenAuthen,
+  checkRoles([RoleName.STAFF_RECRUIT])
+);
+
+// ! Get Recruiter
+router.get(
+  "/api/getRecruiter/:companyId",
+  checkTokenAuthen,
+  checkRoles([RoleName.Recruit]),
+  getListRecruiter
+);
+
 //! Get Profile for Candidate
 router.get(
   "/api/getAccount",
@@ -58,14 +76,19 @@ router.get(
   ]),
   getProfile
 );
-
+router.post("/api/logout", checkTokenAuthen, userLogOut);
 router.put(
   "/api/updateAccount",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST, RoleName.STAFF_RECRUIT, RoleName.Recruit]),
   updateUser
 );
-router.get("/user/getListUser", checkTokenAuthen, checkRoles([RoleName.ADMIN]));
+router.get(
+  "/api/getListUser",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  getListUsers
+);
 router.post(
   "/api/companyFavourite/:companyID",
   checkTokenAuthen,
