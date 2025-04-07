@@ -66,6 +66,11 @@ export const loginUser = async (req, res, next) => {
         .status(404)
         .json({ message: "Email or password was incorrect" });
     }
+    if (findUser.role !== RoleName.GUEST) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to access this" });
+    }
     const token = createToken(findUser);
     res.cookie("jwt", token, {
       httpOnly: true,

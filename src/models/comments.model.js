@@ -3,7 +3,7 @@ const { ObjectId } = mongoose.Schema;
 const commentSchema = new mongoose.Schema({
   account_id: {
     type: ObjectId,
-    required: true,
+    ref: "account",
   },
   company_id: {
     type: ObjectId,

@@ -10,13 +10,13 @@ import { RoleName } from "../models/account.model.js";
 const router = express.Router();
 
 router.get(
-  "/api/company/comments/:companyId",
+  "/api/comments/:companyId",
   checkTokenAuthen,
-  checkRoles([RoleName.STAFF_RECRUIT, RoleName.GUEST]),
+  checkRoles([RoleName.STAFF_RECRUIT, RoleName.GUEST, RoleName.Recruit]),
   getCommentCompanies
 );
 router.post(
-  "/api/reatedComment",
+  "/api/createdComment",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST]),
   createComment
