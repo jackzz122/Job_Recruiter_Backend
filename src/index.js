@@ -7,6 +7,7 @@ import routerPending from "./routes/pendingApprove.js";
 import routeCompany from "./routes/companyInfo.js";
 import dotenv from "dotenv";
 import cors from "cors";
+import routerJobPosting from "./routes/jobPosting.js";
 import routeMajors from "./routes/majorCate.js";
 import accountModel from "./models/account.model.js";
 import cookieParser from "cookie-parser";
@@ -32,6 +33,7 @@ async function main() {
   app.use(routerComment);
   app.use(routerPending);
   app.use(routeCompany);
+  app.use(routerJobPosting);
   app.use(routeMajors);
   app.use(handleError);
   app.use(handleNotFound);

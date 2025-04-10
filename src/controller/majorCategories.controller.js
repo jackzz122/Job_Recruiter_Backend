@@ -11,6 +11,30 @@ export const getMajorCategories = async (req, res, next) => {
   }
 };
 
+export const getNameMajors = async (req, res, next) => {
+  try {
+    const listMajorName = await majorCategories.distinct("name");
+    if (listMajorName.length === 0) {
+      return res.status(404).json({ message: "No major name category" });
+    }
+    return res.json(listMajorName);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMajorLevels = async (req, res, next) => {
+  try {
+    const listMajorLevel = await majorCategories.distinct("level");
+    if (listMajorLevel.length === 0) {
+      return res.status(404).json({ message: "No major level category" });
+    }
+    return res.json(listMajorLevel);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createMajorCategory = async (req, res, next) => {
   try {
     const newCate = await majorCategories({

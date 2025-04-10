@@ -59,10 +59,8 @@ export const createAccountStaff = async (req, res, next) => {
 
 export const deleteAccountStaff = async (req, res, next) => {
   try {
-    console.log("Nice");
-    const findAccount = await account.findOne({ _id: req.params.userId });
-    console.log(findAccount);
-    if (!findAccount) {
+    const deleted = await account.findByIdAndDelete(req.params.userId);
+    if (!deleted) {
       return res.status(404).json({ message: "Account not found" });
     }
     return res.json({ message: "Delete successfully" });

@@ -15,8 +15,7 @@ router.get(
   "/api/companyInfo/:companyId",
   checkTokenAuthen,
   checkRoles([
-    RoleName.STAFF_RECRUIT,
-    ,
+    RoleName.Recruit,
     RoleName.STAFF_RECRUIT,
     RoleName.GUEST,
     RoleName.ADMIN,

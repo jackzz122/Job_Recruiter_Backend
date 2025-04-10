@@ -256,6 +256,7 @@ export const updateUser = async (req, res, next) => {
 
 export const deleteUser = async (req, res, next) => {
   try {
+    console.log(userId);
     const userId = req.userId;
     await account.deleteOne({ _id: userId });
     res.status(200).json({ message: "User deleted successfully" });

@@ -1,21 +1,21 @@
-import jobPosting from "../models/jobPosting.model";
+import jobPosting from "../models/jobPosting.model.js";
 
-export const getAllJobPostings = async (req, res, next) => {
-  try {
-    const jobPostingList = await jobPosting.find();
-    if (!jobPostingList)
-      return res
-        .status(404)
-        .json({ message: "JobPosting not found in any company" });
-    return res.json({ list: jobPostingList });
-  } catch (err) {
-    next(err);
-  }
-};
+// export const getAllJobPostings = async (req, res, next) => {
+//   try {
+//     const jobPostingList = await jobPosting.find();
+//     if (!jobPostingList)
+//       return res
+//         .status(404)
+//         .json({ message: "JobPosting not found in any company" });
+//     return res.json({ list: jobPostingList });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 export const getJobPostingList = async (req, res, next) => {
   try {
-    const company_Id = req.companyId;
+    const company_Id = req.user.companyId;
     const jobPostingList = await jobPosting.find({ companyId: company_Id });
     if (jobPostingList.length === 0)
       return res.status(404).json({ message: "No job posting found" });
@@ -39,29 +39,30 @@ export const getPostingDetails = async (req, res, next) => {
 
 export const createJobPosting = async (req, res, next) => {
   try {
-    const user_Id = req.userId;
-    const company_Id = req.companyId;
+    const user_Id = req.user._id;
+    const company_Id = req.user.companyId;
     const newJobPosting = new jobPosting({
       ...req.body,
-      account_staff_id: user_Id,
-      companyId: company_Id
-    })
+      accountId: user_Id,
+      companyId: company_Id,
+    });
     await newJobPosting.save();
-    return res.status(201).json({message: "Create job posting successfully"})
+    return res.status(201).json({ message: "Create job posting successfully" });
   } catch (err) {
     next(err);
   }
 };
 
 export const updateJobPosting = async (req, res, next) => {
-  try{
+  try {
     const jobPostingId = req.params.jobPostingId;
-    const jobPostingDetail = jobPosting.find({_id: jobPostingId});
-    if(jobPostingDetail.length === 0) return res.status(404).json({message: "Job posting not founded"});
+    const jobPostingDetail = jobPosting.find({ _id: jobPostingId });
+    if (jobPostingDetail.length === 0)
+      return res.status(404).json({ message: "Job posting not founded" });
     Object.assign(jobPostingDetail, req.body);
     await jobPostingDetail.save();
-    return res.json({message: "Updated job successfully"});
-  }catch(err) {
+    return res.json({ message: "Updated job successfully" });
+  } catch (err) {
     next(err);
   }
 };
@@ -70,8 +71,9 @@ export const deleteJobPosting = async (req, res, next) => {
   try {
     const id = req.params.jobPostingId;
     const findJob = await jobPosting.deleteOne({ _id: id });
-    if(findJob.deletedCount === 0) return res.status(404).json({message: "Job posting not foundede"});
-    return res.json({message: "Job posting deleted"})
+    if (findJob.deletedCount === 0)
+      return res.status(404).json({ message: "Job posting not foundede" });
+    return res.json({ message: "Job posting deleted" });
   } catch (err) {
     next(err);
   }
