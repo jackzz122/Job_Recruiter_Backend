@@ -1,6 +1,7 @@
 import company from "../models/companyInfor.model.js";
 import account from "../models/account.model.js";
 import { RoleName } from "../models/account.model.js";
+import { apiResponse } from "../helper/response.helper.js";
 export const getCompanyInfo = async (req, res, next) => {
   try {
     const id = req.params.companyId;
@@ -22,7 +23,11 @@ export const createCompanyInfo = async (req, res, next) => {
     accountRes.role = RoleName.STAFF;
     accountRes.companyId = newCompany._id;
     await accountRes.save();
-    return res.status(201).json({ message: "Company created successfully" });
+    const response = apiResponse.created(
+      newCompany,
+      "Company Created successfully"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -30,12 +35,15 @@ export const createCompanyInfo = async (req, res, next) => {
 export const updateCompanyInfo = async (req, res, next) => {
   try {
     const companyId = req.companyId;
-    const findCompany = await company.find({ _id: companyId });
-    if (findCompany.length === 0)
-      return res.status(404).json({ message: "Company not founded" });
+    const findCompany = await company.findOne({ _id: companyId });
+    if (!findCompany) {
+      const response = apiResponse.notFound("Not found company");
+      return res.status(response.status).json(response.body);
+    }
     Object.assign(findCompany, req.body);
     await findCompany.save();
-    return res.json({ message: "Updated successfully" });
+    const response = apiResponse.success(findCompany, "Updated successfully");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -49,9 +57,11 @@ export const createAccountStaff = async (req, res, next) => {
       companyId: req.body.companyId,
     });
     await newAccountStaff.save();
-    return res
-      .status(201)
-      .json({ status: "success", message: "Create account success" });
+    const response = apiResponse.created(
+      newAccountStaff,
+      "Create Account success"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -61,9 +71,11 @@ export const deleteAccountStaff = async (req, res, next) => {
   try {
     const deleted = await account.findByIdAndDelete(req.params.userId);
     if (!deleted) {
-      return res.status(404).json({ message: "Account not found" });
+      const response = apiResponse.notFound("Not found account");
+      return res.status(response.status).json(response.body);
     }
-    return res.json({ message: "Delete successfully" });
+    const response = apiResponse.success(deleted, "Delete successfullu");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }

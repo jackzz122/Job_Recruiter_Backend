@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  adminLogin,
   companyFavourite,
   createUser,
   deleteUser,
@@ -8,8 +7,7 @@ import {
   getListUsers,
   getProfile,
   jobFavourite,
-  LoginRecruiter,
-  loginUser,
+  loginForUser,
   RegisterRecruiter,
   updateUser,
   userLogOut,
@@ -25,29 +23,20 @@ import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
 const router = express.Router();
 
-// ! Login For Candidate
-router.post("/api/loginAccount", checkSchema(accountValidator), loginUser);
 // ! Register for Candidate
 router.post(
   "/api/createAccount",
   checkSchema(accountRegisterValidator),
   createUser
 );
-
+router.post("/api/login", checkSchema(accountValidator), loginForUser);
 //! Login for Recruiter
-router.post(
-  "/api/loginRecruiter",
-  checkSchema(accountValidator),
-  LoginRecruiter
-);
-//! Register for Recruiter
+
 router.post(
   "/api/RegisterRecruiter",
   checkSchema(recruiterRegisValidator),
   RegisterRecruiter
 );
-//! register for admin
-router.post("/api/adminLogin", checkSchema(accountValidator), adminLogin);
 
 // !Get Profile for Recruiter
 router.get(

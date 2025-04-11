@@ -1,4 +1,5 @@
 import comment from "../models/comments.model.js";
+import { apiResponse } from "../helper/response.helper.js";
 export const createComment = async (req, res, next) => {
   try {
     const user_Id = req.user._id;
@@ -11,7 +12,11 @@ export const createComment = async (req, res, next) => {
       account_id: user_Id,
     });
     await newComment.save();
-    return res.status(201).json({ message: "Comment created successfully" });
+    const response = apiResponse.success(
+      newComment,
+      "Comment created successfully"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -22,9 +27,14 @@ export const getCommentCompanies = async (req, res, next) => {
       .find({ company_id: req.params.companyId })
       .populate("account_id");
     if (companyComments.length === 0) {
-      return res.status(404).json({ message: "Comment not found" });
+      const response = apiResponse.notFoundList("Comment list found");
+      return res.status(response.status).json(response.body);
     }
-    return res.json(companyComments);
+    const response = apiResponse.created(
+      companyComments,
+      "List comments found"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -34,9 +44,12 @@ export const DeleteComment = async (req, res, next) => {
   try {
     const companyId = req.params.commentId;
     const commentRes = await comment.findOne({ companyId: companyId });
-    if (commentRes.length === 0)
-      return res.status(404).json({ message: "Comment not found" });
-    return res.json({ message: "Comment deleted" });
+    if (commentRes.length === 0) {
+      const response = apiResponse.notFound("Comment list not found");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(commentRes, "Delete comment success");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }

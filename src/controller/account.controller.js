@@ -49,38 +49,6 @@ export const createUser = async (req, res, next) => {
     next(err);
   }
 };
-// !Login User for Candidate (Checked)
-export const loginUser = async (req, res, next) => {
-  try {
-    const { isValid, errors, validData } = validateRequest(req);
-    if (!isValid) {
-      return res.status(400).json(errors);
-    }
-    const data = validData;
-    const findUser = await account.findOne({ email: data.email }); //! return object
-    if (!findUser) {
-      return res.status(404).json({ message: "Account not found" });
-    }
-    if (!comparePassword(data.password, findUser.password)) {
-      return res
-        .status(404)
-        .json({ message: "Email or password was incorrect" });
-    }
-    if (findUser.role !== RoleName.GUEST) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to access this" });
-    }
-    const token = createToken(findUser);
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      maxAge: 1000 * maxAge,
-    });
-    return res.json({ message: "Account founded" });
-  } catch (err) {
-    next(err);
-  }
-};
 
 export const forgotPassword = async (req, res, next) => {
   // try {
@@ -97,37 +65,8 @@ export const logout = async (req, res, next) => {
     next(err);
   }
 };
-// ! Login For Recruiter
-export const LoginRecruiter = async (req, res, next) => {
-  try {
-    const { isValid, errors, validData } = validateRequest(req);
-    if (!isValid) {
-      return res.status(400).json(errors);
-    }
-    const data = validData;
-    const findRecruiter = await account.findOne({ email: data.email });
-    if (!findRecruiter) {
-      return res.status(404).json({ message: "Account not found" });
-    }
-    if (!comparePassword(data.password, findRecruiter.password)) {
-      return res
-        .status(404)
-        .json({ message: "Email or password was incorrect" });
-    }
-    if (findRecruiter.role !== RoleName.Recruit) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to access this" });
-    }
-    const token = createToken(findRecruiter);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
-    return res.json({ message: "Account founded" });
-  } catch (err) {
-    next(err);
-  }
-};
 
-export const adminLogin = async (req, res, next) => {
+export const loginForUser = async (req, res, next) => {
   try {
     const { isValid, errors, validData } = validateRequest(req);
     if (!isValid) {
@@ -135,7 +74,6 @@ export const adminLogin = async (req, res, next) => {
     }
     const data = validData;
     const findUser = await account.findOne({ email: data.email });
-    console.log(findUser);
     if (!findUser) {
       return res.status(404).json({ message: "Account not found" });
     }
@@ -144,7 +82,8 @@ export const adminLogin = async (req, res, next) => {
         .status(404)
         .json({ message: "Email or password was incorrect" });
     }
-    if (findUser.role !== RoleName.ADMIN) {
+    const roleGroup = req.body.roleGroup;
+    if (!Array.isArray(roleGroup) || !roleGroup.includes(findUser.role)) {
       return res
         .status(403)
         .json({ message: "You are not authorized to access this" });
@@ -220,8 +159,7 @@ export const getProfile = async (req, res, next) => {
 export const getListUsers = async (req, res, next) => {
   try {
     const listAccount = await account.find({}, { password: 0 });
-    if (listAccount.length === 0)
-      return res.status(404).json({ message: "None user found" });
+    if (listAccount.length === 0) return res.json([]);
     return res.json(listAccount);
   } catch (err) {
     next(err);
@@ -234,8 +172,7 @@ export const getListRecruiter = async (req, res, next) => {
       role: RoleName.STAFF_RECRUIT,
       companyId: req.params.companyId,
     });
-    if (listRecruiter.length === 0)
-      return res.status(404).json({ message: "None user found" });
+    if (listRecruiter.length === 0) return res.json([]);
     return res.json(listRecruiter);
   } catch (err) {
     next(err);

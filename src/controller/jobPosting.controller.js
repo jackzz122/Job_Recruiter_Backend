@@ -1,5 +1,5 @@
 import jobPosting from "../models/jobPosting.model.js";
-
+import { apiResponse } from "../helper/response.helper.js";
 // export const getAllJobPostings = async (req, res, next) => {
 //   try {
 //     const jobPostingList = await jobPosting.find();
@@ -17,9 +17,15 @@ export const getJobPostingList = async (req, res, next) => {
   try {
     const company_Id = req.user.companyId;
     const jobPostingList = await jobPosting.find({ companyId: company_Id });
-    if (jobPostingList.length === 0)
-      return res.status(404).json({ message: "No job posting found" });
-    return res.json(jobPostingList);
+    if (jobPostingList.length === 0) {
+      const response = apiResponse.notFoundList("No job posting found");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(
+      jobPostingList,
+      "job list get success"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -28,10 +34,13 @@ export const getJobPostingList = async (req, res, next) => {
 export const getPostingDetails = async (req, res, next) => {
   try {
     const jobId = req.params.jobId;
-    const findJobPosting = await jobPosting.find({ _id: jobId });
-    if (findJobPosting.length === 0)
-      return res.status(404).json({ message: "Job Posting not found" });
-    return res.status(200).json(findJobPosting);
+    const findJobPosting = await jobPosting.findOne({ _id: jobId });
+    if (!findJobPosting) {
+      const response = apiResponse.notFound("Job posting not found");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(findJobPosting, "Get Job success");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -47,7 +56,11 @@ export const createJobPosting = async (req, res, next) => {
       companyId: company_Id,
     });
     await newJobPosting.save();
-    return res.status(201).json({ message: "Create job posting successfully" });
+    const response = apiResponse.created(
+      newJobPosting,
+      "create job posting successfully"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -56,12 +69,18 @@ export const createJobPosting = async (req, res, next) => {
 export const updateJobPosting = async (req, res, next) => {
   try {
     const jobPostingId = req.params.jobPostingId;
-    const jobPostingDetail = jobPosting.find({ _id: jobPostingId });
-    if (jobPostingDetail.length === 0)
-      return res.status(404).json({ message: "Job posting not founded" });
+    const jobPostingDetail = jobPosting.findOne({ _id: jobPostingId });
+    if (jobPostingDetail) {
+      const response = apiResponse.error("Job posting not found");
+      return res.status(response.status).json(response.body);
+    }
     Object.assign(jobPostingDetail, req.body);
     await jobPostingDetail.save();
-    return res.json({ message: "Updated job successfully" });
+    const response = apiResponse.success(
+      jobPostingDetail,
+      "Update job successfully"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
