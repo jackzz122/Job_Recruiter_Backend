@@ -3,6 +3,7 @@ import {
   createJobPosting,
   deleteJobPosting,
   getJobPostingList,
+  getPostingDetails,
   updateJobPosting,
 } from "../controller/jobPosting.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
@@ -23,22 +24,28 @@ router.get(
   checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT, RoleName.ADMIN]),
   getJobPostingList
 );
+router.get(
+  "/api/getDetailJob/:jobId",
+  checkTokenAuthen,
+  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT]),
+  getPostingDetails
+);
 router.post(
   "/api/createJobPosting",
   checkTokenAuthen,
   checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT]),
   createJobPosting
 );
-router.post(
+router.put(
   "/api/updateJobPosting/:jobPostingId",
   checkTokenAuthen,
-  checkRoles([RoleName.STAFF]),
+  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT]),
   updateJobPosting
 );
 router.delete(
   "/api/deleteJobPosting/:jobPostingId",
   checkTokenAuthen,
-  checkRoles([RoleName.STAFF, RoleName.STAFF_RECRUIT, RoleName.ADMIN]),
+  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT, RoleName.ADMIN]),
   deleteJobPosting
 );
 

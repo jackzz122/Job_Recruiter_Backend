@@ -1,11 +1,12 @@
 import company from "../models/companyInfor.model.js";
 import account from "../models/account.model.js";
 import { RoleName } from "../models/account.model.js";
+import pendingApprove from "../models/pendingApprove.js";
 import { apiResponse } from "../helper/response.helper.js";
 export const getCompanyInfo = async (req, res, next) => {
   try {
-    const id = req.params.companyId;
-    const companyRes = await company.find({ _id: id });
+    console.log("Nice one123123");
+    const companyRes = await company.find({ _id: req.params.id });
     if (companyRes.length === 0)
       return res.status(404).json({ message: "Company not found" });
     return res.json(companyRes);
@@ -32,17 +33,38 @@ export const createCompanyInfo = async (req, res, next) => {
     next(err);
   }
 };
-export const updateCompanyInfo = async (req, res, next) => {
+export const updateCompanyInformation = async (req, res, next) => {
   try {
-    const companyId = req.companyId;
-    const findCompany = await company.findOne({ _id: companyId });
-    if (!findCompany) {
-      const response = apiResponse.notFound("Not found company");
+    // Không cần session nữa
+    const companyDetail = await company.findOne({ _id: req.params.companyId });
+
+    if (!companyDetail) {
+      const response = apiResponse.error("Company not found");
       return res.status(response.status).json(response.body);
     }
-    Object.assign(findCompany, req.body);
-    await findCompany.save();
-    const response = apiResponse.success(findCompany, "Updated successfully");
+
+    Object.assign(companyDetail, req.body);
+    await companyDetail.save();
+
+    const pendingRecord = await pendingApprove.findOne({
+      accountID: companyDetail.accountID,
+    });
+
+    if (pendingRecord) {
+      pendingRecord.companyName =
+        req.body.companyName || pendingRecord.companyName;
+      pendingRecord.phoneNumber =
+        req.body.phoneNumber || pendingRecord.phoneNumber;
+      pendingRecord.address = req.body.address || pendingRecord.address;
+      pendingRecord.websiteUrl =
+        req.body.websiteUrl || pendingRecord.websiteUrl;
+      await pendingRecord.save();
+    }
+
+    const response = apiResponse.success(
+      companyDetail,
+      "Update company information successfully"
+    );
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);

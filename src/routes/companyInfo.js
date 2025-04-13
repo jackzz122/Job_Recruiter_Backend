@@ -9,10 +9,10 @@ import {
   deleteAccountStaff,
   deleteCompanyInfo,
   getCompanyInfo,
-  updateCompanyInfo,
+  updateCompanyInformation,
 } from "../controller/companyInfo.controller.js";
 router.get(
-  "/api/companyInfo/:companyId",
+  "/api/companyInfo/:id",
   checkTokenAuthen,
   checkRoles([
     RoleName.Recruit,
@@ -35,10 +35,10 @@ router.post(
   createCompanyInfo
 );
 router.put(
-  "/api/updateCompany",
+  "/api/updateCompany/:companyId",
   checkTokenAuthen,
   checkRoles([RoleName.Recruit]),
-  updateCompanyInfo
+  updateCompanyInformation
 );
 router.delete(
   "/api/deleteStaffAccount/:userId",
@@ -49,6 +49,7 @@ router.delete(
 router.delete(
   "/api/deleteCompany",
   checkTokenAuthen,
-  checkRoles([RoleName.STAFF_RECRUIT, RoleName.ADMIN], deleteCompanyInfo)
+  checkRoles([RoleName.STAFF_RECRUIT, RoleName.ADMIN]),
+  deleteCompanyInfo
 );
 export default router;

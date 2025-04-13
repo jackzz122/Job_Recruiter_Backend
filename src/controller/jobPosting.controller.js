@@ -33,8 +33,7 @@ export const getJobPostingList = async (req, res, next) => {
 
 export const getPostingDetails = async (req, res, next) => {
   try {
-    const jobId = req.params.jobId;
-    const findJobPosting = await jobPosting.findOne({ _id: jobId });
+    const findJobPosting = await jobPosting.findOne({ _id: req.params.jobId });
     if (!findJobPosting) {
       const response = apiResponse.notFound("Job posting not found");
       return res.status(response.status).json(response.body);
@@ -68,9 +67,10 @@ export const createJobPosting = async (req, res, next) => {
 
 export const updateJobPosting = async (req, res, next) => {
   try {
-    const jobPostingId = req.params.jobPostingId;
-    const jobPostingDetail = jobPosting.findOne({ _id: jobPostingId });
-    if (jobPostingDetail) {
+    const jobPostingDetail = await jobPosting.findOne({
+      _id: req.params.jobPostingId,
+    });
+    if (!jobPostingDetail) {
       const response = apiResponse.error("Job posting not found");
       return res.status(response.status).json(response.body);
     }
@@ -88,11 +88,15 @@ export const updateJobPosting = async (req, res, next) => {
 
 export const deleteJobPosting = async (req, res, next) => {
   try {
-    const id = req.params.jobPostingId;
-    const findJob = await jobPosting.deleteOne({ _id: id });
-    if (findJob.deletedCount === 0)
-      return res.status(404).json({ message: "Job posting not foundede" });
-    return res.json({ message: "Job posting deleted" });
+    const findJob = await jobPosting.deleteOne({
+      _id: req.params.jobPostingId,
+    });
+    if (findJob.deletedCount === 0) {
+      const response = apiResponse.notFound("Job posting not found");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(findJob, "Job posting deleted");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
