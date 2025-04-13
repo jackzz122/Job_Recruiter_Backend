@@ -5,6 +5,7 @@ import routerAccount from "./routes/account.js";
 import routerComment from "./routes/comment.js";
 import routerPending from "./routes/pendingApprove.js";
 import routeCompany from "./routes/companyInfo.js";
+import routeReports from "./routes/reports.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import routerJobPosting from "./routes/jobPosting.js";
@@ -33,6 +34,7 @@ async function main() {
   app.use(routerComment);
   app.use(routerPending);
   app.use(routeCompany);
+  app.use(routeReports);
   app.use(routerJobPosting);
   app.use(routeMajors);
   app.use(handleError);

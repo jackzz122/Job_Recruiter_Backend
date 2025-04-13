@@ -1,17 +1,17 @@
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema;
 export const Status = {
-    PENDING: "pending",
-    REVOLVED: "revolved",
-    RESOLVE: "resolve"
+  PENDING: "pending",
+  REVOLVED: "revolved",
+  RESOLVE: "resolve",
 };
 export const TargetType = {
   JOB: "job",
   COMPANY: "company",
-  COMMENT: "comment"
-}
+  COMMENT: "comment",
+};
 const reportSchema = new mongoose.Schema({
-  account_id: {
+  accountId: {
     type: ObjectId,
     ref: "account",
     required: true,
@@ -22,22 +22,21 @@ const reportSchema = new mongoose.Schema({
   },
   target_type: {
     type: String,
-    enum: ObjectId.values(TargetType),
-    required: true
+    enum: Object.values(TargetType),
+    required: true,
   },
   reason: {
-    type: String,
-    required: true
+    type: Array,
+    required: true,
   },
   status: {
     type: String,
     enum: Object.values(Status),
-    required: true
+    default: "pending",
   },
   createAt: {
     type: Date,
-    default: () => Date.now()
-  }
-
+    default: () => Date.now(),
+  },
 });
 export default mongoose.model("report", reportSchema);
