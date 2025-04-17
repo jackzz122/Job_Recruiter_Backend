@@ -3,6 +3,7 @@ import account from "../models/account.model.js";
 import { RoleName } from "../models/account.model.js";
 import pendingApprove from "../models/pendingApprove.js";
 import { apiResponse } from "../helper/response.helper.js";
+import bcrypt from "bcrypt";
 export const getCompanyInfo = async (req, res, next) => {
   try {
     console.log("Nice one123123");
@@ -35,7 +36,6 @@ export const createCompanyInfo = async (req, res, next) => {
 };
 export const updateCompanyInformation = async (req, res, next) => {
   try {
-    // Không cần session nữa
     const companyDetail = await company.findOne({ _id: req.params.companyId });
 
     if (!companyDetail) {
@@ -73,6 +73,10 @@ export const updateCompanyInformation = async (req, res, next) => {
 
 export const createAccountStaff = async (req, res, next) => {
   try {
+    const { password } = req.body;
+    const saltRounds = 10;
+    const hash = bcrypt.hashSync(password, saltRounds);
+    req.body.password = hash;
     const newAccountStaff = new account({
       ...req.body,
       role: RoleName.STAFF_RECRUIT,

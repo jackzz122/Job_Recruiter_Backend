@@ -66,7 +66,7 @@ router.get(
   getProfile
 );
 router.post("/api/logout", checkTokenAuthen, userLogOut);
-router.put(
+router.patch(
   "/api/updateAccount",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST, RoleName.STAFF_RECRUIT, RoleName.Recruit]),

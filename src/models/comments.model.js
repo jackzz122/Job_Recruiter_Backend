@@ -18,7 +18,11 @@ const commentSchema = new mongoose.Schema({
     required: true,
   },
   details: {
-    type: Array,
+    type: {
+      whyLove: String,
+      suggest: String,
+    },
+    _id: false,
     required: true,
   },
   createdDate: {

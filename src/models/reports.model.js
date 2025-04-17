@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 const { ObjectId } = mongoose.Schema;
 export const Status = {
   PENDING: "pending",
-  REVOLVED: "revolved",
-  RESOLVE: "resolve",
+  RESOLVED: "resolved",
+  REJECTED: "rejected",
 };
 export const TargetType = {
-  JOB: "job",
-  COMPANY: "company",
+  JOB: "jobPosting",
+  COMPANY: "companyInfo",
   COMMENT: "comment",
 };
 const reportSchema = new mongoose.Schema({
@@ -18,6 +18,12 @@ const reportSchema = new mongoose.Schema({
   },
   target_id: {
     type: ObjectId,
+    ref: "account",
+    required: true,
+  },
+  reportTarget: {
+    type: ObjectId,
+    refPath: "target_type",
     required: true,
   },
   target_type: {
@@ -26,7 +32,11 @@ const reportSchema = new mongoose.Schema({
     required: true,
   },
   reason: {
-    type: Array,
+    type: {
+      reasonTitle: String,
+      additionalReason: String,
+    },
+    _id: false,
     required: true,
   },
   status: {
@@ -34,7 +44,7 @@ const reportSchema = new mongoose.Schema({
     enum: Object.values(Status),
     default: "pending",
   },
-  createAt: {
+  createdAt: {
     type: Date,
     default: () => Date.now(),
   },

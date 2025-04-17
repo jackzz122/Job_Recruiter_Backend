@@ -37,9 +37,11 @@ const account = new mongoose.Schema(
     },
     avatarImg: {
       type: String,
+      default: "",
     },
     dob: {
       type: Date,
+      default: "",
     },
     address: {
       type: String,
@@ -57,6 +59,7 @@ const account = new mongoose.Schema(
     gender: {
       type: String,
       enum: Object.values(Gender),
+      default: Gender.MALE,
     },
     avatarIMG: {
       type: String,

@@ -5,9 +5,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import * as _ from "lodash";
 import pendingApprove from "../models/pendingApprove.js";
-import { matchedData, validationResult } from "express-validator";
+// import { matchedData, validationResult } from "express-validator";
 import { RoleName } from "../models/account.model.js";
 import { validateRequest } from "../services/validateRequest.js";
+import { apiResponse } from "../helper/response.helper.js";
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (user) => {
   return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: maxAge });
@@ -42,9 +43,8 @@ export const createUser = async (req, res, next) => {
 
     const token = createToken(userAccount._id, userAccount.role);
     res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
-    return res.json({
-      message: "Create Account successfully",
-    });
+    const response = apiResponse.success("Register successfully");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -137,20 +137,23 @@ export const RegisterRecruiter = async (req, res, next) => {
 export const getProfile = async (req, res, next) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: User not found" });
+      const response = apiResponse.notFound("User not found");
+      return res.status(response.status).json(response.body);
     }
-    const { password, ...currentUser } = req.user;
-    if (req.user.role === RoleName.Recruit) {
-      const findUser = await account
-        .findOne({ _id: req.user._id })
-        .populate("companyId")
-        .lean();
-      if (findUser) {
-        const { password, ...currentUser } = findUser;
-        return res.status(200).json({ success: true, user: currentUser });
-      }
+    let query = account.findOne({ _id: req.user._id });
+    if (
+      req.user.role === RoleName.Recruit ||
+      req.user.role === RoleName.STAFF_RECRUIT
+    ) {
+      query = query.populate("companyId");
     }
-    return res.status(200).json({ success: true, user: currentUser });
+    const findUser = await query.lean();
+    if (!findUser) {
+      return res.status(404).json({ message: "User not found in database" });
+    }
+    const { password, ...currentUser } = findUser;
+    const response = apiResponse.success(currentUser, "Get user success");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -159,8 +162,12 @@ export const getProfile = async (req, res, next) => {
 export const getListUsers = async (req, res, next) => {
   try {
     const listAccount = await account.find({}, { password: 0 });
-    if (listAccount.length === 0) return res.json([]);
-    return res.json(listAccount);
+    if (listAccount.length === 0) {
+      const response = apiResponse.notFoundList("Not found any list users");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(listAccount, "Get list success");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -172,8 +179,12 @@ export const getListRecruiter = async (req, res, next) => {
       role: RoleName.STAFF_RECRUIT,
       companyId: req.params.companyId,
     });
-    if (listRecruiter.length === 0) return res.json([]);
-    return res.json(listRecruiter);
+    if (listRecruiter.length === 0) {
+      const response = apiResponse.notFoundList("Not found any list users");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(listAccount, "Get list success");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -182,8 +193,19 @@ export const getListRecruiter = async (req, res, next) => {
 //! Update User
 export const updateUser = async (req, res, next) => {
   try {
-    const userId = req.userId;
+    const userId = req.user._id;
     const findUser = await account.findOne({ _id: userId });
+    if (!findUser) {
+      const response = await apiResponse.notFound("Not found your account");
+      return res.status(response.status).body(response.body);
+    }
+    Object.keys(req.body).forEach((key) => {
+      findUser[key] = req.body[key];
+    });
+    await findUser.save();
+    console.log("update", findUser);
+    const response = apiResponse.success(findUser, "Update successfully");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -193,7 +215,6 @@ export const updateUser = async (req, res, next) => {
 
 export const deleteUser = async (req, res, next) => {
   try {
-    console.log(userId);
     const userId = req.userId;
     await account.deleteOne({ _id: userId });
     res.status(200).json({ message: "User deleted successfully" });

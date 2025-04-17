@@ -37,7 +37,19 @@ const jobPostingSchema = new mongoose.Schema({
     required: true,
   },
   description: {
-    type: Array,
+    type: {
+      summary: String,
+      keySkills: {
+        mainText: String,
+        bulletPoints: Array,
+      },
+      whyYouLoveIt: {
+        mainText: String,
+        bulletPoints: Array,
+      },
+      _id: false,
+    },
+    _id: false,
     required: true,
   },
   listAccountId: {

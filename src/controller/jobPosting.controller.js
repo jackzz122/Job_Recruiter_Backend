@@ -16,7 +16,9 @@ import { apiResponse } from "../helper/response.helper.js";
 export const getJobPostingList = async (req, res, next) => {
   try {
     const company_Id = req.user.companyId;
-    const jobPostingList = await jobPosting.find({ companyId: company_Id });
+    const jobPostingList = await jobPosting
+      .find({ companyId: company_Id })
+      .populate("accountId", "fullname");
     if (jobPostingList.length === 0) {
       const response = apiResponse.notFoundList("No job posting found");
       return res.status(response.status).json(response.body);
