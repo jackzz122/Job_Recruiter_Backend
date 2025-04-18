@@ -9,6 +9,8 @@ import {
   jobFavourite,
   loginForUser,
   RegisterRecruiter,
+  removeFavouriteCompany,
+  removeFavouriteJob,
   updateUser,
   userLogOut,
 } from "../controller/account.controller.js";
@@ -79,16 +81,28 @@ router.get(
   getListUsers
 );
 router.post(
-  "/api/companyFavourite/:companyID",
+  "/api/companyFavourite/:companyId",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST]),
   companyFavourite
 );
 router.post(
-  "/api/jobFavourite/:jobPostingID",
+  "/api/jobFavourite/:jobPostingId",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST]),
   jobFavourite
 );
 router.delete("/api/deleteAccount", checkTokenAuthen, deleteUser);
+router.delete(
+  "/api/removeFavouriteCompany/:companyId",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  removeFavouriteCompany
+);
+router.delete(
+  "/api/removeFavouriteJob/:jobPostingId",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  removeFavouriteJob
+);
 export default router;

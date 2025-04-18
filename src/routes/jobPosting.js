@@ -19,15 +19,20 @@ const router = express.Router();
 // );
 
 router.get(
-  "/api/jobPostingList",
+  "/api/jobPostingList/:companyId",
   checkTokenAuthen,
-  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT, RoleName.ADMIN]),
+  checkRoles([
+    RoleName.Recruit,
+    RoleName.STAFF_RECRUIT,
+    RoleName.ADMIN,
+    RoleName.GUEST,
+  ]),
   getJobPostingList
 );
 router.get(
   "/api/getDetailJob/:jobId",
   checkTokenAuthen,
-  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT]),
+  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT, RoleName.GUEST]),
   getPostingDetails
 );
 router.post(

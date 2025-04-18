@@ -4,17 +4,34 @@ import { RoleName } from "../models/account.model.js";
 import pendingApprove from "../models/pendingApprove.js";
 import { apiResponse } from "../helper/response.helper.js";
 import bcrypt from "bcrypt";
-export const getCompanyInfo = async (req, res, next) => {
+export const getCompanyList = async (req, res, next) => {
   try {
-    console.log("Nice one123123");
-    const companyRes = await company.find({ _id: req.params.id });
-    if (companyRes.length === 0)
-      return res.status(404).json({ message: "Company not found" });
-    return res.json(companyRes);
+    const companyList = await company.find({});
+    if (companyList.length === 0) {
+      const response = apiResponse.notFoundList("Not found any company list");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(companyList, "Get list success");
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
 };
+
+export const getCompanyInfo = async (req, res, next) => {
+  try {
+    const companyRes = await company.findOne({ _id: req.params.id });
+    if (companyRes.length === 0) {
+      const response = apiResponse.notFound("Not found Company");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(companyRes, "Get company success");
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createCompanyInfo = async (req, res, next) => {
   try {
     const accountRes = await account.findOne({ _id: accountID });

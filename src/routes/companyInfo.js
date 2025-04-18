@@ -9,8 +9,15 @@ import {
   deleteAccountStaff,
   deleteCompanyInfo,
   getCompanyInfo,
+  getCompanyList,
   updateCompanyInformation,
 } from "../controller/companyInfo.controller.js";
+router.get(
+  "/api/companyList",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  getCompanyList
+);
 router.get(
   "/api/companyInfo/:id",
   checkTokenAuthen,
@@ -22,6 +29,7 @@ router.get(
   ]),
   getCompanyInfo
 );
+
 router.post(
   "/api/createStaff",
   checkTokenAuthen,

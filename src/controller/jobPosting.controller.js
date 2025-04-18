@@ -1,5 +1,6 @@
 import jobPosting from "../models/jobPosting.model.js";
 import { apiResponse } from "../helper/response.helper.js";
+import { RoleName } from "../models/account.model.js";
 // export const getAllJobPostings = async (req, res, next) => {
 //   try {
 //     const jobPostingList = await jobPosting.find();
@@ -15,10 +16,15 @@ import { apiResponse } from "../helper/response.helper.js";
 
 export const getJobPostingList = async (req, res, next) => {
   try {
-    const company_Id = req.user.companyId;
-    const jobPostingList = await jobPosting
-      .find({ companyId: company_Id })
+    // const company_Id = req.user.companyId;
+    const query = jobPosting
+      .find({ companyId: req.params.companyId })
       .populate("accountId", "fullname");
+    if (req.user.role === RoleName.GUEST) {
+      query.populate("companyId", "companyName logo");
+    }
+    const jobPostingList = await query;
+    console.log(jobPostingList);
     if (jobPostingList.length === 0) {
       const response = apiResponse.notFoundList("No job posting found");
       return res.status(response.status).json(response.body);
@@ -35,7 +41,11 @@ export const getJobPostingList = async (req, res, next) => {
 
 export const getPostingDetails = async (req, res, next) => {
   try {
-    const findJobPosting = await jobPosting.findOne({ _id: req.params.jobId });
+    const query = jobPosting.findOne({ _id: req.params.jobId });
+    if (req.user.role === RoleName.GUEST) {
+      query.populate("companyId", "companyName");
+    }
+    const findJobPosting = await query;
     if (!findJobPosting) {
       const response = apiResponse.notFound("Job posting not found");
       return res.status(response.status).json(response.body);

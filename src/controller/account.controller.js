@@ -235,16 +235,56 @@ export const userLogOut = async (req, res, next) => {
 // ! Company Favourite
 export const companyFavourite = async (req, res, next) => {
   try {
-    const userId = req.userId;
-    const companyId = req.params.companyID;
-    const findCompany = await company.find({ _id: companyId });
-    if (findCompany.length === 0)
-      return res.status(404).json({ message: "Not found company" });
-    const findUser = await account.find({ _id: userId });
+    const userId = req.user._id;
+    const companyId = req.params.companyId;
+    const findCompany = await company.findOne({ _id: companyId });
+    if (!findCompany) {
+      const response = apiResponse.notFound("Not found company");
+      return res.status(response.status).json(response.body);
+    }
+    const findUser = await account.findById(userId);
+    if (!findUser) {
+      const response = apiResponse.notFound("Not found user");
+      return res.status(response.status).json(response.body);
+    }
+    if (!findUser.listFavouritesCompanyID.includes(companyId)) {
+      findUser.listFavouritesCompanyID.push(companyId);
+      await findUser.save();
+    }
+    const response = apiResponse.success(
+      findUser.listFavouritesCompanyID,
+      "Add favourite company success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 
-    findUser.listFavouritesCompanyID.push(companyId);
+export const removeFavouriteCompany = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const companyId = req.params.companyId;
+
+    const findCompany = await company.findById(companyId);
+    if (!findCompany) {
+      const response = apiResponse.notFound("Not found company");
+      return res.status(response.status).json(response.body);
+    }
+    const findUser = await account.findById(userId);
+    if (!findUser) {
+      const response = apiResponse.notFound("Not found user");
+      return res.status(response.status).json(response.body);
+    }
+    findUser.listFavouritesCompanyID = findUser.listFavouritesCompanyID.filter(
+      (id) => id.toString() !== companyId
+    );
     await findUser.save();
-    return res.json({ message: "Add favourite successfull" });
+    const response = apiResponse.success(
+      findUser.listFavouritesCompanyID,
+      "Remove favourite company success"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -253,15 +293,56 @@ export const companyFavourite = async (req, res, next) => {
 // ! Job Favourite
 export const jobFavourite = async (req, res, next) => {
   try {
-    const userId = req.userId;
-    const jobId = req.params.jobPostingID;
-    const findJobPosting = await jobPosting.find({ _id: jobId });
-    if (findJobPosting.length === 0)
-      return res.status(404).json({ message: "Not found job posting" });
-    const findUser = await account.find({ _id: userId });
-    findUser.listFavouritesJobsID.push(jobId);
+    const userId = req.user._id;
+    const jobId = req.params.jobPostingId;
+
+    const findJobPosting = await jobPosting.findById(jobId);
+    if (!findJobPosting) {
+      const response = apiResponse.notFound("Not found job posting");
+      return res.status(response.status).json(response.body);
+    }
+    const findUser = await account.findById(userId);
+    if (!findUser) {
+      const response = apiResponse.notFound("Not found user");
+      return res.status(response.status).json(response.body);
+    }
+    if (!findUser.listFavouritesJobsID.includes(jobId)) {
+      findUser.listFavouritesJobsID.push(jobId);
+      await findUser.save();
+    }
+    const response = apiResponse.success(
+      findUser.listFavouritesJobsID,
+      "Add job to favourites success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeFavouriteJob = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const jobId = req.params.jobPostingId;
+    const findJobPosting = await jobPosting.findById(jobId);
+    if (!findJobPosting) {
+      const response = apiResponse.notFound("Not found job posting");
+      return res.status(response.status).json(response.body);
+    }
+    const findUser = await account.findById(userId);
+    if (!findUser) {
+      const response = apiResponse.notFound("Not found user");
+      return res.status(response.status).json(response.body);
+    }
+    findUser.listFavouritesJobsID = findUser.listFavouritesJobsID.filter(
+      (id) => id.toString() !== jobId
+    );
     await findUser.save();
-    return res.json({ message: "Add job favourite successfull" });
+    const response = apiResponse.success(
+      findUser.listFavouritesJobsID,
+      "Removed job from favourites"
+    );
+    return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }

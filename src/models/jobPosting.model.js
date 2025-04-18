@@ -22,7 +22,7 @@ const jobPostingSchema = new mongoose.Schema({
   },
   companyId: {
     type: ObjectId,
-    ref: "company",
+    ref: "companyInfo",
   },
   majorId: {
     type: Array,
