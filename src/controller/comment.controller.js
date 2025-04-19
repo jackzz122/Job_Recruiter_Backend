@@ -3,9 +3,15 @@ import { apiResponse } from "../helper/response.helper.js";
 export const createComment = async (req, res, next) => {
   try {
     const user_Id = req.user._id;
-    const commentList = comment.findOne({ account_id: user_id });
-    if (commentList) {
-      return res.status(400).json({ message: "You have already commented" });
+    const Hascomment = await comment.findOne({
+      account_id: user_Id,
+      company_id: req.body.company_id,
+    });
+    if (Hascomment) {
+      const response = apiResponse.badRequest(
+        "You have already commented on this company"
+      );
+      return res.status(response.status).json(response.body);
     }
     const newComment = new comment({
       ...req.body,

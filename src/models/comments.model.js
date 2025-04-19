@@ -7,6 +7,7 @@ const commentSchema = new mongoose.Schema({
   },
   company_id: {
     type: ObjectId,
+    ref: "companyInfo",
     required: true,
   },
   title: {

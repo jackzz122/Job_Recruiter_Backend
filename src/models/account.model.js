@@ -86,12 +86,18 @@ const account = new mongoose.Schema(
       type: String,
       default: "",
     },
-    listFavouritesCompanyID: {
-      type: Array,
-    },
-    listFavouritesJobsID: {
-      type: Array,
-    },
+    listFavouritesCompanyID: [
+      {
+        type: ObjectId,
+        ref: "companyInfo",
+      },
+    ],
+    listFavouritesJobsID: [
+      {
+        type: ObjectId,
+        ref: "jobPosting",
+      },
+    ],
   },
   {
     timestamps: true,

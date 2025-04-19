@@ -111,6 +111,12 @@ export const RegisterRecruiter = async (req, res, next) => {
     if (findAccount.role === RoleName.Recruit) {
       return res.status(403).json({ message: "You are already are Recruiter" });
     }
+    if (findAccount.role === RoleName.STAFF_RECRUIT) {
+      return res.status(403).json({
+        message:
+          "You are not authorized to register this, please contact to our page",
+      });
+    }
     if (findAccount.role === RoleName.ADMIN) {
       return res.status(403).json({ message: "You are already are Admin" });
     }
@@ -146,6 +152,21 @@ export const getProfile = async (req, res, next) => {
       req.user.role === RoleName.STAFF_RECRUIT
     ) {
       query = query.populate("companyId");
+    } else if (req.user.role === RoleName.GUEST) {
+      query = query
+        .populate({
+          path: "listFavouritesCompanyID",
+          select: "companyName country address logo",
+        })
+        .populate({
+          path: "listFavouritesJobsID",
+          select:
+            "title minRange maxRange location startDate applicationDeadline",
+          populate: {
+            path: "companyId",
+            select: "companyName",
+          },
+        });
     }
     const findUser = await query.lean();
     if (!findUser) {
@@ -183,7 +204,7 @@ export const getListRecruiter = async (req, res, next) => {
       const response = apiResponse.notFoundList("Not found any list users");
       return res.status(response.status).json(response.body);
     }
-    const response = apiResponse.success(listAccount, "Get list success");
+    const response = apiResponse.success(listRecruiter, "Get list success");
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
@@ -203,7 +224,6 @@ export const updateUser = async (req, res, next) => {
       findUser[key] = req.body[key];
     });
     await findUser.save();
-    console.log("update", findUser);
     const response = apiResponse.success(findUser, "Update successfully");
     return res.status(response.status).json(response.body);
   } catch (err) {
