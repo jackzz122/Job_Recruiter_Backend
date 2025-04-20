@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  changePassword,
   companyFavourite,
   createUser,
   deleteUser,
@@ -68,6 +69,7 @@ router.get(
   getProfile
 );
 router.post("/api/logout", checkTokenAuthen, userLogOut);
+router.put("/api/changePassword", checkTokenAuthen, changePassword);
 router.patch(
   "/api/updateAccount",
   checkTokenAuthen,

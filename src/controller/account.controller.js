@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import * as _ from "lodash";
 import pendingApprove from "../models/pendingApprove.js";
-// import { matchedData, validationResult } from "express-validator";
 import { RoleName } from "../models/account.model.js";
 import { validateRequest } from "../services/validateRequest.js";
 import { apiResponse } from "../helper/response.helper.js";
@@ -14,8 +13,8 @@ const createToken = (user) => {
   return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: maxAge });
 };
 
-export const comparePassword = (password, hasPash) => {
-  return bcrypt.compareSync(password, hasPash);
+export const comparePassword = async (password, hasPash) => {
+  return await bcrypt.compare(password, hasPash);
 };
 
 // ! Create User for Candidate (checked)
@@ -56,6 +55,34 @@ export const forgotPassword = async (req, res, next) => {
   //   next(err);
   // }
 };
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const findUser = await account.findOne({ _id: req.user._id });
+    if (!findUser) {
+      const response = apiResponse.notFound("Not found your account");
+      return res.status(response.status).json(response.body);
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await comparePassword(oldPassword, findUser.password);
+    if (!isMatch) {
+      const response = apiResponse.badRequest("Your old password is wrong");
+      return res.status(response.status).json(response.body);
+    }
+    const saltRounds = 10;
+    const hashPass = await bcrypt.hash(newPassword, saltRounds);
+    findUser.password = hashPass;
+    await findUser.save();
+    const { password, ...currentUser } = findUser.toObject();
+    const response = apiResponse.success(
+      currentUser,
+      "Change password success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 // ! Logout user
 export const logout = async (req, res, next) => {
   try {
@@ -77,7 +104,8 @@ export const loginForUser = async (req, res, next) => {
     if (!findUser) {
       return res.status(404).json({ message: "Account not found" });
     }
-    if (!comparePassword(data.password, findUser.password)) {
+    const isMatch = await comparePassword(data.password, findUser.password);
+    if (!isMatch) {
       return res
         .status(404)
         .json({ message: "Email or password was incorrect" });
@@ -235,9 +263,17 @@ export const updateUser = async (req, res, next) => {
 
 export const deleteUser = async (req, res, next) => {
   try {
-    const userId = req.userId;
-    await account.deleteOne({ _id: userId });
-    res.status(200).json({ message: "User deleted successfully" });
+    const userId = req.user._id;
+    const deleteUser = await account.findOneAndDelete({ _id: userId });
+    if (!deleteUser) {
+      const response = apiResponse.notFound("Delete your account error");
+      return response.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(
+      deleteUser,
+      "User account delete successfull"
+    );
+    res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
@@ -280,7 +316,7 @@ export const companyFavourite = async (req, res, next) => {
     next(err);
   }
 };
-
+// ! Remove company Favourite
 export const removeFavouriteCompany = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -339,7 +375,7 @@ export const jobFavourite = async (req, res, next) => {
     next(err);
   }
 };
-
+// ! Remove Job Favourite
 export const removeFavouriteJob = async (req, res, next) => {
   try {
     const userId = req.user._id;
