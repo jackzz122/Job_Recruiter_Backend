@@ -56,6 +56,10 @@ const account = new mongoose.Schema(
       type: String,
       default: "",
     },
+    aboutMe: {
+      type: String,
+      default: "",
+    },
     gender: {
       type: String,
       enum: Object.values(Gender),
@@ -69,15 +73,89 @@ const account = new mongoose.Schema(
       type: ObjectId,
       ref: "major",
     },
-    education: {
-      type: Array,
-    },
+    projects: [
+      {
+        projectName: {
+          type: String,
+          default: "",
+        },
+        link: {
+          type: String,
+          default: "",
+        },
+        description: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+    education: [
+      {
+        major: {
+          type: String,
+          default: "",
+        },
+        school: {
+          type: String,
+          default: "",
+        },
+        startDate: {
+          type: String,
+          default: "",
+        },
+        endDate: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
     skills: {
       type: Array,
     },
-    certificate: {
-      type: Array,
-    },
+    certificate: [
+      {
+        name: {
+          type: String,
+          default: "",
+        },
+        organization: {
+          type: String,
+          default: "",
+        },
+        month: {
+          type: Number,
+          default: "",
+        },
+        year: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+    workEx: [
+      {
+        jobTitle: {
+          type: String,
+          default: "",
+        },
+        company: {
+          type: String,
+          default: "",
+        },
+        responsibilites: {
+          type: String,
+          default: "",
+        },
+        startDate: {
+          type: String,
+          default: "",
+        },
+        endDate: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
     companyId: {
       type: ObjectId,
       ref: "companyInfo",

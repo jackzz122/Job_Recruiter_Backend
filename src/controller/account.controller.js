@@ -248,8 +248,21 @@ export const updateUser = async (req, res, next) => {
       const response = await apiResponse.notFound("Not found your account");
       return res.status(response.status).body(response.body);
     }
-    Object.keys(req.body).forEach((key) => {
-      findUser[key] = req.body[key];
+    const arrayFields = ["education", "certificate", "projects", "workEx"];
+    Object.entries(req.body).forEach(([key, value]) => {
+      if (arrayFields.includes(key)) {
+        // if (value === null || value === "__remove") {
+        //   findUser[key] = [];
+        // } else if (Array.isArray(value)) {
+        //   findUser[key] = value;
+        // } else {
+        //   if (!Array.isArray(findUser[key])) findUser[key] = [];
+        //   findUser[key].push(value);
+        // }
+        findUser[key].push(value);
+      } else {
+        findUser[key] = value;
+      }
     });
     await findUser.save();
     const response = apiResponse.success(findUser, "Update successfully");
