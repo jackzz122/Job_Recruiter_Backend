@@ -22,8 +22,11 @@ import {
   accountValidator,
   recruiterRegisValidator,
 } from "../middleware/accountValidator.js";
+import multer from "multer";
 import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
+import bodyParser from "body-parser";
+import { upload } from "../middleware/multerMiddle.js";
 const router = express.Router();
 
 // ! Register for Candidate
@@ -69,11 +72,13 @@ router.get(
   getProfile
 );
 router.post("/api/logout", checkTokenAuthen, userLogOut);
+
 router.put("/api/changePassword", checkTokenAuthen, changePassword);
 router.patch(
   "/api/updateAccount",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST, RoleName.STAFF_RECRUIT, RoleName.Recruit]),
+  upload.single("avatarIMG"),
   updateUser
 );
 router.get(

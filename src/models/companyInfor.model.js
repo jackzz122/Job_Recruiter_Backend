@@ -49,7 +49,7 @@ const companyInfoSchema = new mongoose.Schema({
     default: "",
   },
   years: {
-    type: Number,
+    type: String,
     default: 0,
   },
   description: {

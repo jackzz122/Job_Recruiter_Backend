@@ -7,6 +7,7 @@ import routerPending from "./routes/pendingApprove.js";
 import routeCompany from "./routes/companyInfo.js";
 import routeReports from "./routes/reports.js";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
 import cors from "cors";
 import routerJobPosting from "./routes/jobPosting.js";
 import routeMajors from "./routes/majorCate.js";
@@ -20,8 +21,9 @@ async function main() {
   await mongoose
     .connect(process.env.MONGODB)
     .then(() => console.log("[ ready ] Connected to MongoDB"));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-  app.use(express.json());
   app.use(
     cors({
       origin: "http://localhost:5173",
@@ -31,6 +33,7 @@ async function main() {
   app.use(cookieParser());
   // node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
   app.use(routerAccount);
+
   app.use(routerComment);
   app.use(routerPending);
   app.use(routeCompany);

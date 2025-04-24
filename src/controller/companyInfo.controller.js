@@ -4,6 +4,7 @@ import { RoleName } from "../models/account.model.js";
 import pendingApprove from "../models/pendingApprove.js";
 import { apiResponse } from "../helper/response.helper.js";
 import bcrypt from "bcrypt";
+import cloudinary from "../utils/cloudinary.js";
 export const getCompanyList = async (req, res, next) => {
   try {
     const companyList = await company.find({});
@@ -59,7 +60,18 @@ export const updateCompanyInformation = async (req, res, next) => {
       const response = apiResponse.error("Company not found");
       return res.status(response.status).json(response.body);
     }
-
+    let logoError = null;
+    if (req.file) {
+      try {
+        const results = await cloudinary.uploader.upload(req.file.path, {
+          folder: "logoCompany",
+        });
+        companyDetail.logo = results.secure_url;
+      } catch (err) {
+        console.log(err);
+        logoError = "Có vấn đề về upload logo ảnh công ty";
+      }
+    }
     Object.assign(companyDetail, req.body);
     await companyDetail.save();
 
@@ -77,11 +89,16 @@ export const updateCompanyInformation = async (req, res, next) => {
         req.body.websiteUrl || pendingRecord.websiteUrl;
       await pendingRecord.save();
     }
-
     const response = apiResponse.success(
       companyDetail,
       "Update company information successfully"
     );
+    if (logoError) {
+      return res.status(response.status).json({
+        ...response.body,
+        logoError,
+      });
+    }
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);

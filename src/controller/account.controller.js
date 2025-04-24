@@ -7,7 +7,10 @@ import * as _ from "lodash";
 import pendingApprove from "../models/pendingApprove.js";
 import { RoleName } from "../models/account.model.js";
 import { validateRequest } from "../services/validateRequest.js";
+import comment from "../models/comments.model.js";
+import cloudinary from "../utils/cloudinary.js";
 import { apiResponse } from "../helper/response.helper.js";
+import fs from "fs/promises";
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (user) => {
   return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: maxAge });
@@ -238,7 +241,6 @@ export const getListRecruiter = async (req, res, next) => {
     next(err);
   }
 };
-
 //! Update User
 export const updateUser = async (req, res, next) => {
   try {
@@ -246,26 +248,60 @@ export const updateUser = async (req, res, next) => {
     const findUser = await account.findOne({ _id: userId });
     if (!findUser) {
       const response = await apiResponse.notFound("Not found your account");
-      return res.status(response.status).body(response.body);
+      return res.status(response.status).json(response.body);
     }
-    const arrayFields = ["education", "certificate", "projects", "workEx"];
-    Object.entries(req.body).forEach(([key, value]) => {
-      if (arrayFields.includes(key)) {
-        // if (value === null || value === "__remove") {
-        //   findUser[key] = [];
-        // } else if (Array.isArray(value)) {
-        //   findUser[key] = value;
-        // } else {
-        //   if (!Array.isArray(findUser[key])) findUser[key] = [];
-        //   findUser[key].push(value);
-        // }
-        findUser[key].push(value);
-      } else {
-        findUser[key] = value;
+    let avatarUploadError = null;
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "avatar",
+        });
+        findUser.avatarIMG = result.secure_url;
+        await fs.unlink(filePath);
+      } catch (err) {
+        console.log(err);
+        avatarUploadError = "Có lỗi khi tải ảnh lên. Vui lòng thử lại!";
       }
-    });
+    }
+    if (req.body) {
+      const arrayFields = [
+        "education",
+        "certificate",
+        "projects",
+        "workEx",
+        "skill",
+      ];
+      Object.entries(req.body).forEach(([key, value]) => {
+        if (arrayFields.includes(key)) {
+          if (value._id) {
+            const index = findUser[key].findIndex(
+              (item) => item._id.toString() === value._id
+            );
+            console.log("index", index);
+            if (index !== -1) {
+              const hasOnlyId = Object.keys(value).length === 1;
+              if (hasOnlyId) {
+                findUser[key].splice(index, 1);
+              } else {
+                const { _id, ...bodyValue } = value;
+                console.log(bodyValue);
+                findUser[key][index] = { ...findUser[key][index], ...value };
+              }
+            }
+          } else findUser[key].push(value);
+        } else {
+          findUser[key] = value;
+        }
+      });
+    }
     await findUser.save();
     const response = apiResponse.success(findUser, "Update successfully");
+    if (avatarUploadError) {
+      return res.status(response.status).json({
+        ...response.body,
+        avatarUploadError,
+      });
+    }
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
@@ -273,7 +309,6 @@ export const updateUser = async (req, res, next) => {
 };
 
 // ! Delete user
-
 export const deleteUser = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -282,6 +317,7 @@ export const deleteUser = async (req, res, next) => {
       const response = apiResponse.notFound("Delete your account error");
       return response.status(response.status).json(response.body);
     }
+    await Promise.all([comment.deleteOne({ _id: userId })]);
     const response = apiResponse.success(
       deleteUser,
       "User account delete successfull"

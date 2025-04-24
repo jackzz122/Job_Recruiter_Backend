@@ -12,6 +12,7 @@ import {
   getCompanyList,
   updateCompanyInformation,
 } from "../controller/companyInfo.controller.js";
+import { upload } from "../middleware/multerMiddle.js";
 router.get(
   "/api/companyList",
   checkTokenAuthen,
@@ -46,6 +47,7 @@ router.put(
   "/api/updateCompany/:companyId",
   checkTokenAuthen,
   checkRoles([RoleName.Recruit]),
+  upload.single("logo"),
   updateCompanyInformation
 );
 router.delete(

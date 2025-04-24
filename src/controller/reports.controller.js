@@ -4,7 +4,7 @@ export const getReportList = async (req, res, next) => {
   try {
     const reportList = await reportModel
       .find({})
-      .populate("accountId", "fullname email")
+      .populate("accountId", "fullname email avatarIMG")
       .populate("target_id", "fullname email")
       .populate("reportTarget")
       .lean();
