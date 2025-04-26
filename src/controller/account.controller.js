@@ -269,7 +269,7 @@ export const updateUser = async (req, res, next) => {
         "certificate",
         "projects",
         "workEx",
-        "skill",
+        "skills",
       ];
       Object.entries(req.body).forEach(([key, value]) => {
         if (arrayFields.includes(key)) {
@@ -277,7 +277,7 @@ export const updateUser = async (req, res, next) => {
             const index = findUser[key].findIndex(
               (item) => item._id.toString() === value._id
             );
-            console.log("index", index);
+
             if (index !== -1) {
               const hasOnlyId = Object.keys(value).length === 1;
               if (hasOnlyId) {

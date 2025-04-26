@@ -1,6 +1,9 @@
 import jobPosting from "../models/jobPosting.model.js";
 import { apiResponse } from "../helper/response.helper.js";
 import { RoleName } from "../models/account.model.js";
+import account from "../models/account.model.js";
+import cloudinary from "../utils/cloudinary.js";
+import fs from "fs";
 // export const getAllJobPostings = async (req, res, next) => {
 //   try {
 //     const jobPostingList = await jobPosting.find();
@@ -21,10 +24,12 @@ export const getJobPostingList = async (req, res, next) => {
       .find({ companyId: req.params.companyId })
       .populate("accountId", "fullname");
     if (req.user.role === RoleName.GUEST) {
-      query.populate("companyId", "companyName logo");
+      query.populate("companyId", "companyName logo").populate({
+        path: "listAccount.accountId",
+        select: "fullname email avatarIMG",
+      });
     }
-    const jobPostingList = await query;
-    console.log(jobPostingList);
+    const jobPostingList = await query.exec();
     if (jobPostingList.length === 0) {
       const response = apiResponse.notFoundList("No job posting found");
       return res.status(response.status).json(response.body);
@@ -38,7 +43,44 @@ export const getJobPostingList = async (req, res, next) => {
     next(err);
   }
 };
-
+export const addApplicants = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const job = await jobPosting.findById(req.params.jobId);
+    if (!job) {
+      return res.status(404).json(apiResponse.notFound("Job not found"));
+    }
+    let newPdfFile = "";
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "pdfFolder",
+        });
+        newPdfFile = result.secure_url;
+        fs.unlinkSync(req.file.path);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    const inforUserPost = {
+      accountId: userId,
+      coverLetter: req.body.coverLetter,
+      linkPdf: newPdfFile || "",
+    };
+    const index = job.listAccount.findIndex(
+      (entry) => entry.accountId.toString() === userId
+    );
+    if (index !== -1) {
+      Object.assign(job.listAccount[index], inforUserPost);
+    } else job.listAccount.push(inforUserPost);
+    await job.save();
+    const response = apiResponse.created(inforUserPost, "Applicant successs");
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+export const removeApplicants = async (req, res, next) => {};
 export const getPostingDetails = async (req, res, next) => {
   try {
     const query = jobPosting.findOne({ _id: req.params.jobId });

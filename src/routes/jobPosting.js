@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  addApplicants,
   createJobPosting,
   deleteJobPosting,
   getJobPostingList,
@@ -9,6 +10,7 @@ import {
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
+import { upload } from "../middleware/multerMiddle.js";
 const router = express.Router();
 
 // router.get(
@@ -28,6 +30,13 @@ router.get(
     RoleName.GUEST,
   ]),
   getJobPostingList
+);
+router.post(
+  "/api/addApplicant/:jobId",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  upload.single("linkPdf"),
+  addApplicants
 );
 router.get(
   "/api/getDetailJob/:jobId",

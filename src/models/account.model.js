@@ -83,6 +83,18 @@ const account = new mongoose.Schema(
           type: String,
           default: "",
         },
+        startDate: {
+          type: String,
+          default: "",
+        },
+        endDate: {
+          type: String,
+          default: "",
+        },
+        role: {
+          type: String,
+          default: "",
+        },
         description: {
           type: String,
           default: "",
@@ -107,11 +119,20 @@ const account = new mongoose.Schema(
           type: String,
           default: "",
         },
+        description: {
+          type: String,
+          default: "",
+        },
       },
     ],
-    skills: {
-      type: Array,
-    },
+    skills: [
+      {
+        value: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
     certificate: [
       {
         name: {
@@ -127,6 +148,10 @@ const account = new mongoose.Schema(
           default: "",
         },
         year: {
+          type: String,
+          default: "",
+        },
+        description: {
           type: String,
           default: "",
         },
@@ -151,6 +176,10 @@ const account = new mongoose.Schema(
           default: "",
         },
         endDate: {
+          type: String,
+          default: "",
+        },
+        description: {
           type: String,
           default: "",
         },

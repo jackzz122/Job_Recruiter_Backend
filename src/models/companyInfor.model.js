@@ -9,6 +9,10 @@ const companyInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isBigCompany: {
+    type: Boolean,
+    default: false,
+  },
   country: {
     type: String,
     default: "",

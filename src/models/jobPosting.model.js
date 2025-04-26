@@ -5,6 +5,11 @@ const statusPost = {
   Stop: "stop",
   Close: "close",
 };
+const statusApplications = {
+  Submitted: "Submitted",
+  Reviewing: "Reviewing",
+  Rejected: "Rejected",
+};
 const jobPostingSchema = new mongoose.Schema({
   accountId: {
     type: ObjectId,
@@ -52,9 +57,35 @@ const jobPostingSchema = new mongoose.Schema({
     _id: false,
     required: true,
   },
-  listAccountId: {
-    type: Array,
-  },
+  listAccount: [
+    {
+      accountId: {
+        type: ObjectId,
+        ref: "account",
+      },
+      linkPdf: {
+        type: String,
+        default: "",
+      },
+      appliedAt: {
+        type: Date,
+        default: () => Date.now(),
+      },
+      coverLetter: {
+        type: String,
+        default: "",
+      },
+      status: {
+        type: String,
+        enum: Object.values(statusApplications),
+        default: "Submitted",
+      },
+      notes: {
+        type: String,
+        default: "",
+      },
+    },
+  ],
   status: {
     type: String,
     enum: Object.values(statusPost),
