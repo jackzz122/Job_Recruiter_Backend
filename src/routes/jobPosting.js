@@ -3,14 +3,17 @@ import {
   addApplicants,
   createJobPosting,
   deleteJobPosting,
+  getCandidateFromJobPosting,
   getJobPostingList,
   getPostingDetails,
+  removeApplicants,
   updateJobPosting,
 } from "../controller/jobPosting.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
 import { upload } from "../middleware/multerMiddle.js";
+import { changeStatus } from "../controller/companyInfo.controller.js";
 const router = express.Router();
 
 // router.get(
@@ -31,12 +34,30 @@ router.get(
   ]),
   getJobPostingList
 );
+router.get(
+  "/api/getCandidateFromJobPosting",
+  checkTokenAuthen,
+  checkRoles([RoleName.STAFF_RECRUIT, RoleName.Recruit]),
+  getCandidateFromJobPosting
+);
+router.post(
+  "/api/changeStatus/:userId",
+  checkTokenAuthen,
+  checkRoles([RoleName.STAFF_RECRUIT, RoleName.Recruit]),
+  changeStatus
+);
 router.post(
   "/api/addApplicant/:jobId",
   checkTokenAuthen,
   checkRoles([RoleName.GUEST]),
   upload.single("linkPdf"),
   addApplicants
+);
+router.delete(
+  "/api/deleteApplicant/:userId",
+  checkTokenAuthen,
+  checkRoles([RoleName.Recruit, RoleName.STAFF_RECRUIT]),
+  removeApplicants
 );
 router.get(
   "/api/getDetailJob/:jobId",

@@ -5,10 +5,11 @@ const statusPost = {
   Stop: "stop",
   Close: "close",
 };
-const statusApplications = {
+export const statusApplications = {
   Submitted: "Submitted",
   Reviewing: "Reviewing",
   Rejected: "Rejected",
+  Success: "Success",
 };
 const jobPostingSchema = new mongoose.Schema({
   accountId: {

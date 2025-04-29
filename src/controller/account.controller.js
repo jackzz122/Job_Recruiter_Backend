@@ -241,6 +241,28 @@ export const getListRecruiter = async (req, res, next) => {
     next(err);
   }
 };
+export const getAppliedJobList = async (req, res, next) => {
+  try {
+    const findAccountApplied = await jobPosting
+      .find({
+        "listAccount.accountId": req.params.userId,
+      })
+      .populate("companyId", "companyName logo");
+    if (findAccountApplied.length === 0) {
+      const response = apiResponse.notFoundList(
+        "Not found any job you are applied"
+      );
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(
+      findAccountApplied,
+      "Get job applied success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 //! Update User
 export const updateUser = async (req, res, next) => {
   try {

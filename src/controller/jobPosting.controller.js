@@ -16,7 +16,44 @@ import fs from "fs";
 //     next(err);
 //   }
 // };
-
+export const getCandidateFromJobPosting = async (req, res, next) => {
+  try {
+    const jobPostings = await jobPosting
+      .find({})
+      .populate("listAccount.accountId", "fullname email phone avatarIMG");
+    const jobPostingList = jobPostings.map((job) => {
+      return {
+        jobId: job._id,
+        jobTitle: job.title,
+        listAccount: job.listAccount.map((account) => {
+          return {
+            accountId: account.accountId._id,
+            fullname: account.accountId.fullname,
+            email: account.accountId.email,
+            phone: account.accountId.phone,
+            avatarIMG: account.accountId.avatarIMG,
+            linkPdf: account.linkPdf,
+            coverLetter: account.coverLetter,
+            notes: account.notes,
+            status: account.status,
+            appliedAt: account.appliedAt,
+          };
+        }),
+      };
+    });
+    if (jobPostingList.length === 0) {
+      const response = apiResponse.notFoundList("No job posting found");
+      return res.status(response.status).json(response.body);
+    }
+    const response = apiResponse.success(
+      jobPostingList,
+      "job list get success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 export const getJobPostingList = async (req, res, next) => {
   try {
     // const company_Id = req.user.companyId;
@@ -24,10 +61,7 @@ export const getJobPostingList = async (req, res, next) => {
       .find({ companyId: req.params.companyId })
       .populate("accountId", "fullname");
     if (req.user.role === RoleName.GUEST) {
-      query.populate("companyId", "companyName logo").populate({
-        path: "listAccount.accountId",
-        select: "fullname email avatarIMG",
-      });
+      query.populate("companyId", "companyName logo");
     }
     const jobPostingList = await query.exec();
     if (jobPostingList.length === 0) {
@@ -80,7 +114,36 @@ export const addApplicants = async (req, res, next) => {
     next(err);
   }
 };
-export const removeApplicants = async (req, res, next) => {};
+export const removeApplicants = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const findJob = await jobPosting.findOne({ _id: req.body.jobId });
+    if (!findJob) {
+      const response = apiResponse.notFound("Job posting not found");
+      return res.status(response.status).json(response.body);
+    }
+    const existed = findJob.listAccount.some(
+      (acc) => acc.accountId.toString() === req.params.userId
+    );
+
+    if (!existed) {
+      const response = apiResponse.notFound("Account not found in job posting");
+      return res.status(response.status).json(response.body);
+    }
+    const filterAccount = (findJob.listAccount = findJob.listAccount.filter(
+      (account) => account.accountId.toString() !== req.params.userId
+    ));
+    findJob.listAccount = filterAccount;
+    await findJob.save();
+    const response = apiResponse.success(
+      findJob,
+      "Remove account from job posting success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 export const getPostingDetails = async (req, res, next) => {
   try {
     const query = jobPosting.findOne({ _id: req.params.jobId });

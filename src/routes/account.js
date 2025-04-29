@@ -4,6 +4,7 @@ import {
   companyFavourite,
   createUser,
   deleteUser,
+  getAppliedJobList,
   getListRecruiter,
   getListUsers,
   getProfile,
@@ -34,6 +35,12 @@ router.post(
   "/api/createAccount",
   checkSchema(accountRegisterValidator),
   createUser
+);
+router.get(
+  "/api/appliedJobList/:userId",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  getAppliedJobList
 );
 router.post("/api/login", checkSchema(accountValidator), loginForUser);
 //! Login for Recruiter

@@ -5,6 +5,10 @@ import pendingApprove from "../models/pendingApprove.js";
 import { apiResponse } from "../helper/response.helper.js";
 import bcrypt from "bcrypt";
 import cloudinary from "../utils/cloudinary.js";
+import jobPostingModel, {
+  statusApplications,
+} from "../models/jobPosting.model.js";
+import { sendMailService } from "../services/EmailService.js";
 export const getCompanyList = async (req, res, next) => {
   try {
     const companyList = await company.find({});
@@ -47,6 +51,47 @@ export const createCompanyInfo = async (req, res, next) => {
       newCompany,
       "Company Created successfully"
     );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+export const changeStatus = async (req, res, next) => {
+  try {
+    const findUserApplied = await jobPostingModel.findOne({
+      _id: req.body.jobId,
+    });
+    if (!findUserApplied) {
+      const response = apiResponse.notFound("Not found job posting");
+      return res.status(response.status).json(response.body);
+    }
+    const getUser = findUserApplied.listAccount.find((account) => {
+      return account.accountId.toString() === req.params.userId;
+    });
+    getUser.status = req.body.status;
+    await findUserApplied.save();
+    if (req.body.status === statusApplications.Success) {
+      console.log("Email send");
+      await sendMailService(
+        req.body.ownerMail,
+        "Hi friend",
+        "Front your web you have a new application",
+        req.body.receiveMail,
+        "Your application was successful!"
+      );
+    }
+    if (req.body.status === statusApplications.Rejected) {
+      console.log("Email send");
+      await sendMailService(
+        req.body.ownerMail,
+        "You are being Rejected",
+        "Thanks for spent time for our",
+        req.body.receiveMail,
+        "So so sory!"
+      );
+    }
+
+    const response = apiResponse.success(getUser, "Update success");
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
