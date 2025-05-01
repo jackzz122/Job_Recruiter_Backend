@@ -26,6 +26,10 @@ const account = new mongoose.Schema(
       maxLength: 32,
       required: true,
     },
+    title: {
+      type: String,
+      default: "",
+    },
     categoryId: {
       type: ObjectId,
       ref: "category",
@@ -40,7 +44,7 @@ const account = new mongoose.Schema(
       default: "",
     },
     dob: {
-      type: Date,
+      type: String,
       default: "",
     },
     address: {
@@ -69,10 +73,7 @@ const account = new mongoose.Schema(
       type: String,
       default: "",
     },
-    majorId: {
-      type: ObjectId,
-      ref: "major",
-    },
+
     projects: [
       {
         projectName: {

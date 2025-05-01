@@ -4,6 +4,7 @@ import {
   companyFavourite,
   createUser,
   deleteUser,
+  generateImproveText,
   getAppliedJobList,
   getListRecruiter,
   getListUsers,
@@ -50,7 +51,12 @@ router.post(
   checkSchema(recruiterRegisValidator),
   RegisterRecruiter
 );
-
+router.post(
+  "/api/improve_text",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  generateImproveText
+);
 // !Get Profile for Recruiter
 router.get(
   "/api/getProfileRecruiter",

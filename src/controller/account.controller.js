@@ -11,6 +11,8 @@ import comment from "../models/comments.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import { apiResponse } from "../helper/response.helper.js";
 import fs from "fs/promises";
+import { GoogleGenAI } from "@google/genai";
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (user) => {
   return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: maxAge });
@@ -43,7 +45,7 @@ export const createUser = async (req, res, next) => {
 
     await userAccount.save();
 
-    const token = createToken(userAccount._id, userAccount.role);
+    const token = createToken(userAccount);
     res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
     const response = apiResponse.success("Register successfully");
     return res.status(response.status).json(response.body);
@@ -329,7 +331,63 @@ export const updateUser = async (req, res, next) => {
     next(err);
   }
 };
+export const generateImproveText = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { field, content } = req.body;
+    if (!field || !content) {
+      const response = apiResponse.badRequest("Field và content là bắt buộc");
+      return res.status(response.status).json(response.body);
+    }
+    const prompt = `Hãy viết lại phần "${field}" sau đây để súc tích, chuyên nghiệp và dễ đọc hơn. Giữ nguyên ý chính, ngắn gọn hơn: "${content}"`;
+    const maxRetries = 4;
+    let attempt = 0;
+    let responseText = null;
 
+    while (attempt < maxRetries) {
+      try {
+        const result = await ai.models.generateContent({
+          model: "gemini-2.0-flash-lite",
+          contents: prompt,
+        });
+
+        responseText = result.text;
+        // Nếu thành công, thoát khỏi vòng lặp
+        break;
+      } catch (error) {
+        attempt++;
+        console.log(
+          `Lần thử ${attempt}/${maxRetries} thất bại: ${error.message}`
+        );
+
+        // Nếu đã hết số lần thử hoặc lỗi không phải là quá tải, ném lỗi
+        if (attempt >= maxRetries || !error.message.includes("overloaded")) {
+          throw error;
+        }
+
+        // Chờ trước khi thử lại (thời gian chờ tăng dần)
+        const waitTime = 1000 * attempt; // 1s, 2s, 3s...
+        console.log(`Chờ ${waitTime}ms trước khi thử lại...`);
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+      }
+    }
+    return res.status(200).json({
+      success: true,
+      data: {
+        original: content,
+        improved: responseText,
+        field: field,
+      },
+    });
+  } catch (err) {
+    console.error("Lỗi khi tạo nội dung cải thiện:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Đã xảy ra lỗi khi tạo nội dung cải thiện",
+      error: err.message,
+    });
+  }
+};
 // ! Delete user
 export const deleteUser = async (req, res, next) => {
   try {
