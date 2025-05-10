@@ -1,19 +1,14 @@
 import express from "express";
 import {
   changePassword,
-  companyFavourite,
   createUser,
   deleteUser,
   generateImproveText,
-  getAppliedJobList,
   getListRecruiter,
   getListUsers,
   getProfile,
-  jobFavourite,
   loginForUser,
   RegisterRecruiter,
-  removeFavouriteCompany,
-  removeFavouriteJob,
   updateUser,
   userLogOut,
 } from "../controller/account.controller.js";
@@ -24,11 +19,17 @@ import {
   accountValidator,
   recruiterRegisValidator,
 } from "../middleware/accountValidator.js";
-import multer from "multer";
 import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
-import bodyParser from "body-parser";
+
 import { upload } from "../middleware/multerMiddle.js";
+import {
+  companyFavourite,
+  jobFavourite,
+  removeFavouriteCompany,
+  removeFavouriteJob,
+  getAppliedJobList,
+} from "../controller/candidate.controller.js";
 const router = express.Router();
 
 // ! Register for Candidate

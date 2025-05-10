@@ -1,18 +1,9 @@
-import pendingApprove from "../models/pendingApprove.js";
-import account from "../models/account.model.js";
-import { RoleName } from "../models/account.model.js";
-import company from "../models/companyInfor.model.js";
-import { status } from "../models/pendingApprove.js";
 import { apiResponse } from "../helper/response.helper.js";
+import pendingApproveService from "../services/pendingApprove.service.js";
+
 export const getPendingList = async (req, res, next) => {
   try {
-    const pendingList = await pendingApprove
-      .find()
-      .populate({ path: "accountID", select: "fullname email avatarImg" });
-    if (pendingList.length === 0) {
-      const response = apiResponse.notFoundList("Not found any pending list");
-      return res.status(response.status).json(response.body);
-    }
+    const pendingList = await pendingApproveService.getPendingList();
     const response = apiResponse.success(
       pendingList,
       "Get pending list success"
@@ -25,23 +16,10 @@ export const getPendingList = async (req, res, next) => {
 
 export const confirmPendingItem = async (req, res, next) => {
   try {
-    const findUser = await account.findOne({ _id: req.params.userId });
-    if (!findUser) {
-      const response = apiResponse.notFound("Account not found");
-      return res.status(response.status).json(response.body);
-    }
-    const pendingItem = await pendingApprove.findOne({
-      accountID: req.params.userId,
-    });
-    pendingItem.status = status.APPROVE;
-    await pendingItem.save();
-    const newCompany = new company({
-      ...req.body,
-    });
-    await newCompany.save();
-    findUser.role = RoleName.Recruit;
-    findUser.companyId = newCompany._id;
-    await findUser.save();
+    const pendingItem = await pendingApproveService.confirmPendingItem(
+      req.params.userId,
+      req.body
+    );
     const response = apiResponse.created(
       pendingItem,
       "Company created successfully"
@@ -51,18 +29,12 @@ export const confirmPendingItem = async (req, res, next) => {
     next(err);
   }
 };
+
 export const blockPendingItem = async (req, res, next) => {
   try {
-    const findUser = await account.findOne({ _id: req.params.userId });
-    if (!findUser) {
-      const response = apiResponse.notFound("Account not Found");
-      return res.status(response.status).json(response.body);
-    }
-    const pendingItem = await pendingApprove.findOne({
-      accountID: req.params.userId,
-    });
-    pendingItem.status = status.BLOCKED;
-    await pendingItem.save();
+    const pendingItem = await pendingApproveService.blockPendingItem(
+      req.params.userId
+    );
     const response = apiResponse.success(
       pendingItem,
       "Company blocked successfully"
@@ -72,31 +44,25 @@ export const blockPendingItem = async (req, res, next) => {
     next(err);
   }
 };
+
 export const unBlockPendingItem = async (req, res, next) => {
   try {
-    const findUser = await account.findOne({ _id: req.params.userId });
-    if (!findUser) {
-      const response = apiResponse.notFound("Account not Found");
-      return res.status(response.status).json(response.body);
-    }
-    const pendingItem = await pendingApprove.findOne({
-      accountID: req.params.userId,
-    });
-    pendingItem.status = status.PENDING;
-    await pendingItem.save();
+    const pendingItem = await pendingApproveService.unBlockPendingItem(
+      req.params.userId
+    );
     const response = apiResponse.success(
       pendingItem,
-      "Company blocked successfully"
+      "Company unblocked successfully"
     );
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
 };
+
 export const deletePendingItems = async (req, res, next) => {
   try {
-    const id = req.params.pendingItemsId;
-    await pendingApprove.deleteOne({ _id: id });
+    await pendingApproveService.deletePendingItems(req.params.pendingItemsId);
     return res
       .status(204)
       .json({ message: "Pending items deleted successfully" });
