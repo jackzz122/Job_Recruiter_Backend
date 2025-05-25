@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  blockPendingItem,
+  changeStatusPendingItem,
   confirmPendingItem,
   deletePendingItems,
   getPendingList,
@@ -8,6 +8,14 @@ import {
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkRoles } from "../middleware/checkRoles.js";
 import { RoleName } from "../models/account.model.js";
+import {
+  approveAccount,
+  blockedAccount,
+  blockedCompanyAccount,
+  deleteAccount,
+  getListRecruiterCompanyAccount,
+  unBlockedCompanyAccount,
+} from "../controller/admin.controller.js";
 const router = express.Router();
 
 router.get(
@@ -22,16 +30,49 @@ router.post(
   checkRoles([RoleName.ADMIN]),
   confirmPendingItem
 );
-router.post(
-  "/api/blockPendingItem/:userId",
+router.get(
+  "/api/getListRecruiterCompanyAccount",
   checkTokenAuthen,
   checkRoles([RoleName.ADMIN]),
-  blockPendingItem
+  getListRecruiterCompanyAccount
 );
-router.post(
-  "/api/unblockPending/:userId",
+router.put(
+  "/api/blockedCompanyAccount/:companyId",
   checkTokenAuthen,
-  checkRoles([RoleName.ADMIN])
+  checkRoles([RoleName.ADMIN]),
+  blockedCompanyAccount
+);
+router.put(
+  "/api/unBlockedCompanyAccount/:companyId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  unBlockedCompanyAccount
+);
+router.put(
+  "/api/changePendingApproveStatus/:pendingItemId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  changeStatusPendingItem
+);
+
+router.put(
+  "/api/blockedAccount/:accountId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  blockedAccount
+);
+router.put(
+  "/api/approveAccount/:accountId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  approveAccount
+);
+
+router.delete(
+  "/api/deleteAccountByAdmin/:accountId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  deleteAccount
 );
 router.delete(
   "/api/deletePendingApprove/:pendingItemsId",

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { status } from "./pendingApprove.js";
 const { ObjectId } = mongoose.Schema;
 const companyInfoSchema = new mongoose.Schema({
   accountID: {
@@ -55,6 +56,11 @@ const companyInfoSchema = new mongoose.Schema({
   years: {
     type: String,
     default: 0,
+  },
+  status: {
+    type: String,
+    enum: Object.values(status),
+    default: status.APPROVE,
   },
   description: {
     type: Array,

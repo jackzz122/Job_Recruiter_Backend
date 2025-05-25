@@ -9,6 +9,9 @@ import jobPostingModel, {
   statusApplications,
 } from "../models/jobPosting.model.js";
 import { sendMailService } from "../services/EmailService.js";
+import { statusAccount } from "../models/account.model.js";
+import applicationService from "../services/application.service.js";
+
 export const getCompanyList = async (req, res, next) => {
   try {
     const companyList = await company.find({});
@@ -56,47 +59,28 @@ export const createCompanyInfo = async (req, res, next) => {
     next(err);
   }
 };
+
 export const changeStatus = async (req, res, next) => {
   try {
-    const findUserApplied = await jobPostingModel.findOne({
-      _id: req.body.jobId,
-    });
-    if (!findUserApplied) {
-      const response = apiResponse.notFound("Not found job posting");
-      return res.status(response.status).json(response.body);
-    }
-    const getUser = findUserApplied.listAccount.find((account) => {
-      return account.accountId.toString() === req.params.userId;
-    });
-    getUser.status = req.body.status;
-    await findUserApplied.save();
-    if (req.body.status === statusApplications.Success) {
-      console.log("Email send");
-      await sendMailService(
-        req.body.ownerMail,
-        "Hi friend",
-        "Front your web you have a new application",
-        req.body.receiveMail,
-        "Your application was successful!"
-      );
-    }
-    if (req.body.status === statusApplications.Rejected) {
-      console.log("Email send");
-      await sendMailService(
-        req.body.ownerMail,
-        "You are being Rejected",
-        "Thanks for spent time for our",
-        req.body.receiveMail,
-        "So so sory!"
-      );
-    }
+    const { jobId, status, ownerMail, receiveMail, customEmail } = req.body;
+    const { userId } = req.params;
 
-    const response = apiResponse.success(getUser, "Update success");
+    const result = await applicationService.changeStatus(
+      jobId,
+      userId,
+      status,
+      ownerMail,
+      receiveMail,
+      customEmail
+    );
+
+    const response = apiResponse.success(result, "Status updated successfully");
     return res.status(response.status).json(response.body);
   } catch (err) {
     next(err);
   }
 };
+
 export const updateCompanyInformation = async (req, res, next) => {
   try {
     const companyDetail = await company.findOne({ _id: req.params.companyId });
@@ -160,8 +144,16 @@ export const createAccountStaff = async (req, res, next) => {
       ...req.body,
       role: RoleName.STAFF_RECRUIT,
       companyId: req.body.companyId,
+      statusAccount: statusAccount.ACTIVE,
     });
     await newAccountStaff.save();
+    await sendMailService(
+      req.body.ownerMail,
+      "Information Account",
+      "From web tuyen dung, you have been accepted",
+      newAccountStaff.email,
+      `This is your account: ${newAccountStaff.email} and password: ${password}`
+    );
     const response = apiResponse.created(
       newAccountStaff,
       "Create Account success"

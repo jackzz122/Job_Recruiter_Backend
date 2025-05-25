@@ -30,29 +30,17 @@ export const confirmPendingItem = async (req, res, next) => {
   }
 };
 
-export const blockPendingItem = async (req, res, next) => {
+export const changeStatusPendingItem = async (req, res, next) => {
   try {
-    const pendingItem = await pendingApproveService.blockPendingItem(
-      req.params.userId
+    console.log(req.body);
+    console.log(req.params.pendingItemId);
+    const pendingItem = await pendingApproveService.changeStatusPendingItem(
+      req.params.pendingItemId,
+      req.body.status
     );
     const response = apiResponse.success(
       pendingItem,
-      "Company blocked successfully"
-    );
-    return res.status(response.status).json(response.body);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const unBlockPendingItem = async (req, res, next) => {
-  try {
-    const pendingItem = await pendingApproveService.unBlockPendingItem(
-      req.params.userId
-    );
-    const response = apiResponse.success(
-      pendingItem,
-      "Company unblocked successfully"
+      "Status pending item changed successfully"
     );
     return res.status(response.status).json(response.body);
   } catch (err) {

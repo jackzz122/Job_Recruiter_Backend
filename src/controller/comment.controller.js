@@ -8,6 +8,7 @@ export const createComment = async (req, res, next) => {
       req.body.company_id,
       req.body
     );
+    console.log(newComment);
     const response = apiResponse.success(
       newComment,
       "Comment created successfully"

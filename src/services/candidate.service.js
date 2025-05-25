@@ -1,15 +1,56 @@
 import applicationService from "./application.service.js";
-import account from "../models/account.model.js";
+import account, { RoleName } from "../models/account.model.js";
 import jobPosting from "../models/jobPosting.model.js";
 import company from "../models/companyInfor.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs/promises";
 import { GoogleGenAI } from "@google/genai";
-
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
 class candidateService {
-  async uploadCV() {}
+  async uploadCV(candidateId, file, fileName) {
+    const findUser = await account.findById(candidateId);
+    if (!findUser) {
+      const error = new Error("Candidate not found");
+      error.status = 404;
+      throw error;
+    }
+    let newFile = "";
+    if (file) {
+      try {
+        const upload = await cloudinary.uploader.upload(file.path, {
+          folder: "UserCV",
+        });
+        newFile = upload.secure_url;
+        fs.unlink(file.path);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    findUser.uploadCV = {
+      linkPdf: newFile,
+      nameFile: fileName,
+      uploadedAt: new Date(),
+    };
+    await findUser.save();
+    return findUser;
+  }
+  async removeCV(candidateId) {
+    const findUser = await account.findById(candidateId);
+    if (!findUser) {
+      const error = new Error("Candidate not found");
+      error.status = 404;
+      throw error;
+    }
+    findUser.uploadCV = {
+      linkPdf: "",
+      nameFile: "",
+      uploadedAt: null,
+    };
+    await findUser.save();
+    return findUser;
+  }
   async getProfileCandidate(candidateId) {
     const profileCandidate = await account.findById(candidateId);
     if (!profileCandidate) {
@@ -109,19 +150,17 @@ class candidateService {
     const appliedList = await applicationService.getCompaniesAppliedByCandidate(
       candidateId
     );
-    console.log("appliedList", appliedList);
     return appliedList;
   }
   async deleteAccount(candidateId) {}
 
   async getProfile(userId, role) {
     let query = account.findOne({ _id: userId });
-
-    if (role === "guest") {
+    if (role === RoleName.GUEST) {
       query = query
         .populate({
           path: "listFavouritesCompanyID",
-          select: "companyName country address logo",
+          select: "companyName country address logo status",
         })
         .populate({
           path: "listFavouritesJobsID",
@@ -129,9 +168,12 @@ class candidateService {
             "title minRange maxRange location startDate applicationDeadline",
           populate: {
             path: "companyId",
-            select: "companyName",
+            select: "companyName logo status",
           },
         });
+    }
+    if (role === RoleName.STAFF_RECRUIT || role === RoleName.Recruit) {
+      query = query.populate("companyId");
     }
 
     const findUser = await query.lean();

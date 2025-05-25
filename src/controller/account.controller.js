@@ -13,7 +13,13 @@ import adminService from "../services/admin.service.js";
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (user) => {
-  return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: maxAge });
+  return jwt.sign(
+    { _id: user._id, role: user.role, companyId: user.companyId },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: maxAge,
+    }
+  );
 };
 
 export const comparePassword = async (password, hasPash) => {
@@ -34,12 +40,40 @@ export const createUser = async (req, res, next) => {
 };
 
 export const forgotPassword = async (req, res, next) => {
-  // try {
-  // } catch (err) {
-  //   next(err);
-  // }
+  try {
+    const { email } = req.body;
+    const { message, id } = await authService.forgotPassword(email);
+    const response = apiResponse.success(id, message);
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
 };
 
+export const verifyCode = async (req, res, next) => {
+  try {
+    const { code } = req.body;
+    const data = await authService.verifyCode(req.body.id, code);
+    const response = apiResponse.success(data, "Code verified successfully");
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { newPassword, id } = req.body;
+    const updatedUser = await authService.resetPassword(id, newPassword);
+    const response = apiResponse.success(
+      updatedUser,
+      "Change password success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 export const changePassword = async (req, res, next) => {
   try {
     const currentUser = await authService.changePassword(

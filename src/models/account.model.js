@@ -11,7 +11,12 @@ export const Gender = {
   FEMALE: "female",
   OTHER: "other",
 };
-
+export const statusAccount = {
+  PENDING: "pending",
+  APPROVE: "approve",
+  BLOCKED: "blocked",
+  REJECTED: "rejected",
+};
 const account = new mongoose.Schema(
   {
     email: {
@@ -38,10 +43,6 @@ const account = new mongoose.Schema(
       type: String,
       maxLength: 32,
       required: true,
-    },
-    avatarImg: {
-      type: String,
-      default: "",
     },
     dob: {
       type: String,
@@ -73,7 +74,36 @@ const account = new mongoose.Schema(
       type: String,
       default: "",
     },
-
+    uploadCV: {
+      linkPdf: {
+        type: String,
+        default: "",
+      },
+      nameFile: {
+        type: String,
+        default: "",
+      },
+      uploadedAt: {
+        type: Date,
+        default: () => Date.now(),
+      },
+    },
+    statusAccount: {
+      type: String,
+      enum: Object.values(statusAccount),
+      default: function () {
+        return this.role === RoleName.Recruit
+          ? statusAccount.PENDING
+          : statusAccount.APPROVE;
+      },
+    },
+    forgotPassCode: {
+      type: String,
+      default: "",
+    },
+    forgotPassCodeExpire: {
+      type: Date,
+    },
     projects: [
       {
         projectName: {

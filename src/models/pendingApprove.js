@@ -28,6 +28,11 @@ const pendingApproveSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  prevStatus: {
+    type: String,
+    enum: Object.values(status),
+    default: status.PENDING,
+  },
   status: {
     type: String,
     enum: Object.values(status),

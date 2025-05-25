@@ -1,18 +1,65 @@
-import account from "../models/account.model.js";
+import account, { statusAccount } from "../models/account.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { RoleName } from "../models/account.model.js";
 import pendingApprove from "../models/pendingApprove.js";
-
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 const maxAge = 3 * 24 * 60 * 60;
 
 class authService {
   createToken(user) {
-    return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: maxAge });
+    return jwt.sign(
+      { _id: user._id, role: user.role, companyId: user.companyId },
+      process.env.JWT_SECRET,
+      { expiresIn: maxAge }
+    );
   }
 
   async comparePassword(password, hasPash) {
     return await bcrypt.compare(password, hasPash);
+  }
+
+  async forgotPassword(email) {
+    const findUser = await account.findOne({ email });
+    if (!findUser) {
+      const error = new Error("Account not found");
+      error.status = 404;
+      throw error;
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const transpoter = await nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Reset Password",
+      text: `Your code is ${code}`,
+    };
+    await account.updateOne(
+      { _id: findUser._id },
+      {
+        $set: {
+          forgotPassCode: code,
+          forgotPassCodeExpire: new Date(Date.now() + 2 * 60 * 1000),
+        },
+      }
+    );
+    await transpoter.sendMail(mailOptions);
+
+    return {
+      id: findUser._id,
+      message: "Reset password email sent",
+    };
   }
 
   async createUser(data) {
@@ -58,7 +105,13 @@ class authService {
       error.status = 403;
       throw error;
     }
-
+    if (findUser.statusAccount === statusAccount.BLOCKED) {
+      const error = new Error(
+        "Your account has been blocked, please contact to our admin to unblock"
+      );
+      error.status = 403;
+      throw error;
+    }
     return findUser;
   }
 
@@ -89,7 +142,13 @@ class authService {
       error.status = 403;
       throw error;
     }
-
+    if (findAccount.statusAccount === statusAccount.BLOCKED) {
+      const error = new Error(
+        "Your account has been blocked, please contact to our admin to unblock"
+      );
+      error.status = 403;
+      throw error;
+    }
     const pendingItem = await pendingApprove.findOne({
       accountID: findAccount._id,
     });
@@ -128,6 +187,59 @@ class authService {
     findUser.password = hashPass;
     await findUser.save();
 
+    const { password, ...currentUser } = findUser.toObject();
+    return currentUser;
+  }
+  async verifyCode(userId, verifyCode) {
+    const findUser = await account.findOne({ _id: userId });
+    if (!findUser) {
+      const error = new Error("Account not found");
+      error.status = 404;
+      throw error;
+    }
+    const userCode = verifyCode;
+    const realCode = findUser.forgotPassCode;
+    const expired = findUser.forgotPassCodeExpire;
+
+    if (!realCode || !expired) {
+      const error = new Error("No verification code found");
+      error.status = 400;
+      throw error;
+    }
+
+    if (realCode !== userCode) {
+      const error = new Error("Invalid verification code");
+      error.status = 400;
+      throw error;
+    }
+
+    if (new Date() > expired) {
+      const error = new Error("Verification code has expired");
+      error.status = 400;
+      throw error;
+    }
+
+    await account.updateOne(
+      { _id: findUser._id },
+      { $unset: { forgotPassCode: "", forgotPassCodeExpire: "" } }
+    );
+
+    return {
+      message: "Code verified successfully",
+      userId: findUser._id,
+    };
+  }
+  async resetPassword(userId, newPassword) {
+    const findUser = await account.findOne({ _id: userId });
+    if (!findUser) {
+      const error = new Error("Account not found");
+      error.status = 404;
+      throw error;
+    }
+    const saltRounds = 10;
+    const hashPass = await bcrypt.hash(newPassword, saltRounds);
+    findUser.password = hashPass;
+    await findUser.save();
     const { password, ...currentUser } = findUser.toObject();
     return currentUser;
   }

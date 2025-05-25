@@ -1,5 +1,16 @@
 import jobPostingModel from "../models/jobPosting.model.js";
 class jobPostingService {
+  async getAllJobPosting() {
+    const jobPosting = await jobPostingModel
+      .find()
+      .populate("companyId", "companyName logo status");
+    if (jobPosting.length === 0) {
+      const error = new Error("No job posting found");
+      error.statusCode = 404;
+      throw error;
+    }
+    return jobPosting;
+  }
   async createJob(ownerId, companyId, data) {
     const newJobPosting = await jobPostingModel({
       ...data,
@@ -8,6 +19,17 @@ class jobPostingService {
     });
     await newJobPosting.save();
     return newJobPosting;
+  }
+  async changeStatus(jobId, status) {
+    const jobPosting = await jobPostingModel.findById(jobId);
+    if (!jobPosting) {
+      const error = new Error("Job posting not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    jobPosting.status = status;
+    await jobPosting.save();
+    return jobPosting;
   }
   async getJobPostingList(companyId) {
     const jobPosting = await jobPostingModel
@@ -20,6 +42,7 @@ class jobPostingService {
         path: "companyId",
         select: "companyName logo",
       });
+    console.log(jobPosting);
     if (jobPosting.length === 0) {
       const error = new Error("No job posting list found");
       error.statusCode = 404;
@@ -28,7 +51,9 @@ class jobPostingService {
     return jobPosting;
   }
   async getJobPostingById(jobId) {
-    const jobPosting = await jobPostingModel.findOne({ _id: jobId });
+    const jobPosting = await jobPostingModel
+      .findOne({ _id: jobId })
+      .populate("companyId");
     if (!jobPosting) {
       const error = new Error("No job posting found");
       error.statusCode = 404;

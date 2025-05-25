@@ -1,8 +1,10 @@
 import express from "express";
 import {
   addApplicants,
+  changeStatusJobPosting,
   createJobPosting,
   deleteJobPosting,
+  getAllJobPosting,
   getCandidateFromJobPosting,
   getJobPostingList,
   getPostingDetails,
@@ -22,7 +24,12 @@ const router = express.Router();
 //   checkRoles(["admin"]),
 //   getAllJobPostings
 // );
-
+router.get(
+  "/api/getAllJobPosting",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST, RoleName.ADMIN]),
+  getAllJobPosting
+);
 router.get(
   "/api/jobPostingList/:companyId",
   checkTokenAuthen,
@@ -34,8 +41,14 @@ router.get(
   ]),
   getJobPostingList
 );
+router.post(
+  "/api/changeStatusJobPosting/:jobId",
+  checkTokenAuthen,
+  checkRoles([RoleName.STAFF_RECRUIT, RoleName.Recruit]),
+  changeStatusJobPosting
+);
 router.get(
-  "/api/getCandidateFromJobPosting",
+  "/api/getCandidateFromJobPosting/:companyId",
   checkTokenAuthen,
   checkRoles([RoleName.STAFF_RECRUIT, RoleName.Recruit]),
   getCandidateFromJobPosting

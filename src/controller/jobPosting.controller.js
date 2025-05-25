@@ -9,11 +9,55 @@ import applicationService from "../services/application.service.js";
 
 export const getCandidateFromJobPosting = async (req, res, next) => {
   try {
-    const jobPostingList = await applicationService.getCandidateByJob();
+    const companyId = req.params.companyId;
+    const jobPostingList = await applicationService.getCandidateByJob(
+      companyId
+    );
     if (jobPostingList.length === 0) {
       const response = apiResponse.notFoundList("No job posting found");
       return res.status(response.status).json(response.body);
     }
+    const response = apiResponse.success(
+      jobPostingList,
+      "job list get success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+export const searchJobPosting = async (req, res, next) => {
+  try {
+    const searchJobPosting = await jobPostingService.searchJobPosting(
+      req.params.jobId
+    );
+    const response = apiResponse.success(
+      searchJobPosting,
+      "Search job posting success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+export const changeStatusJobPosting = async (req, res, next) => {
+  try {
+    const updatedJobPosting = await jobPostingService.changeStatus(
+      req.params.jobId,
+      req.body.status
+    );
+    const response = apiResponse.success(
+      updatedJobPosting,
+      "Change status job posting success"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+export const getAllJobPosting = async (req, res, next) => {
+  try {
+    const jobPostingList = await jobPostingService.getAllJobPosting();
     const response = apiResponse.success(
       jobPostingList,
       "job list get success"
@@ -51,7 +95,8 @@ export const addApplicants = async (req, res, next) => {
       userId,
       req.params.jobId,
       req.file,
-      req.body.coverLetter
+      req.body.coverLetter,
+      req.body.cvLink
     );
     const response = apiResponse.created(inforUserPost, "Applicant successs");
     return res.status(response.status).json(response.body);

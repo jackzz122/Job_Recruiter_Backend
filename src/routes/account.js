@@ -3,14 +3,17 @@ import {
   changePassword,
   createUser,
   deleteUser,
+  forgotPassword,
   generateImproveText,
   getListRecruiter,
   getListUsers,
   getProfile,
   loginForUser,
   RegisterRecruiter,
+  resetPassword,
   updateUser,
   userLogOut,
+  verifyCode,
 } from "../controller/account.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
 import { checkSchema } from "express-validator";
@@ -29,6 +32,8 @@ import {
   removeFavouriteCompany,
   removeFavouriteJob,
   getAppliedJobList,
+  uploadCV,
+  removeCV,
 } from "../controller/candidate.controller.js";
 const router = express.Router();
 
@@ -46,7 +51,12 @@ router.get(
 );
 router.post("/api/login", checkSchema(accountValidator), loginForUser);
 //! Login for Recruiter
-
+router.delete(
+  "/api/removeCV",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  removeCV
+);
 router.post(
   "/api/RegisterRecruiter",
   checkSchema(recruiterRegisValidator),
@@ -58,13 +68,6 @@ router.post(
   checkRoles([RoleName.GUEST]),
   generateImproveText
 );
-// !Get Profile for Recruiter
-router.get(
-  "/api/getProfileRecruiter",
-  checkTokenAuthen,
-  checkRoles([RoleName.STAFF_RECRUIT])
-);
-
 // ! Get Recruiter
 router.get(
   "/api/getRecruiter/:companyId",
@@ -72,7 +75,16 @@ router.get(
   checkRoles([RoleName.Recruit]),
   getListRecruiter
 );
-
+router.post("/api/forgotPassword", forgotPassword);
+router.post("/api/verifyCode", verifyCode);
+router.post("/api/resetPassword", resetPassword);
+router.put(
+  "/api/uploadCV",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  upload.single("uploadCV"),
+  uploadCV
+);
 //! Get Profile for Candidate
 router.get(
   "/api/getAccount",

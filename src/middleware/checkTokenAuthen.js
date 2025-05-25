@@ -5,7 +5,11 @@ export const checkTokenAuthen = (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) return err.status(401).json({ auth: err.message });
       else {
-        req.user = decoded.user;
+        req.user = {
+          _id: decoded._id,
+          role: decoded.role,
+          companyId: decoded.companyId,
+        };
         next();
       }
     });

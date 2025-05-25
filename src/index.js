@@ -11,11 +11,42 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import routerJobPosting from "./routes/jobPosting.js";
 import routeMajors from "./routes/majorCate.js";
-import accountModel from "./models/account.model.js";
 import cookieParser from "cookie-parser";
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 const app = express();
 dotenv.config();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+
+// Create HTTP server
+const httpServer = createServer(app);
+
+// Initialize Socket.IO with CORS configuration
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// WebSocket connection handler
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+
+  // Example: Handle custom events
+  socket.on("message", (data) => {
+    console.log("Received message:", data);
+    // Broadcast the message to all connected clients
+    io.emit("message", data);
+  });
+});
 
 async function main() {
   await mongoose
@@ -46,6 +77,8 @@ async function main() {
 
 main().catch((err) => console.log(err));
 
-app.listen(port, () => {
-  console.log(`[ ready ] On port ${port}`);
+// Use httpServer instead of app.listen
+httpServer.listen(port, () => {
+  console.log(`[ ready ] Server running on port ${port}`);
+  console.log(`[ ready ] WebSocket server is running`);
 });

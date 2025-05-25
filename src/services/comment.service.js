@@ -5,14 +5,16 @@ class commentService {
       account_id: accountId,
       company_id: companyId,
     });
+    console.log(content);
     if (Hascomment) {
       const err = new Error("You have already commented on this company");
       err.status = 400;
       throw err;
     }
-    const newComment = new comment({
-      content,
+    const newComment = new commentsModel({
+      ...content,
       account_id: accountId,
+      company_id: companyId,
     });
     await newComment.save();
     return newComment;

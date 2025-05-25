@@ -16,7 +16,28 @@ export const companyFavourite = async (req, res, next) => {
     next(err);
   }
 };
-
+export const removeCV = async (req, res, next) => {
+  try {
+    const updatedUser = await candidateService.removeCV(req.user._id);
+    const response = apiResponse.success(updatedUser, "Remove CV success");
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
+export const uploadCV = async (req, res, next) => {
+  try {
+    const updatedUser = await candidateService.uploadCV(
+      req.user._id,
+      req.file,
+      req.body.nameFile
+    );
+    const response = apiResponse.success(updatedUser, "Upload CV success");
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 export const getAppliedJobList = async (req, res, next) => {
   try {
     const findAccountApplied = await candidateService.getAppliedJobs(
