@@ -61,25 +61,29 @@ async function main() {
   app.use(
     cors({
       origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
+        // Cho phép các công cụ không có origin như Postman hoặc curl
+        if (!origin) return callback(null, true);
+
+        // Cho phép mọi domain vercel.app (nếu bạn tin tưởng)
+        if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+          return callback(null, true);
         }
+
+        // Nếu không nằm trong danh sách thì từ chối
+        return callback(new Error("Not allowed by CORS"));
       },
       credentials: true,
     })
   );
-
   app.options(
     "*",
     cors({
       origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+          return callback(null, true);
         }
+        return callback(new Error("Not allowed by CORS"));
       },
       credentials: true,
     })
