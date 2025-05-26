@@ -25,12 +25,11 @@ const httpServer = createServer(app);
 // Initialize Socket.IO with CORS configuration
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    origin: ["http://localhost:5173", "https://job-recruiter-gcjg.vercel.app/"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   },
 });
-
 // WebSocket connection handler
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
