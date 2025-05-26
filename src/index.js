@@ -26,7 +26,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: ["http://localhost:5173", "https://job-recruiter-gcjg.vercel.app/"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
@@ -51,15 +51,18 @@ async function main() {
   await mongoose
     .connect(process.env.MONGODB)
     .then(() => console.log("[ ready ] Connected to MongoDB"));
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
-
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: [
+        "http://localhost:5173",
+        "https://job-recruiter-gcjg.vercel.app/",
+      ],
       credentials: true,
     })
   );
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+
   app.use(cookieParser());
   // node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
   app.use(routerAccount);

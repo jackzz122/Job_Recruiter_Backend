@@ -31,7 +31,12 @@ export const createUser = async (req, res, next) => {
   try {
     const userAccount = await authService.createUser(req.body);
     const token = authService.createToken(userAccount);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: 1000 * maxAge,
+      secure: true,
+      sameSite: "none",
+    });
     const response = apiResponse.success("Register successfully");
     return res.status(response.status).json(response.body);
   } catch (err) {
@@ -115,7 +120,12 @@ export const loginForUser = async (req, res, next) => {
     );
 
     const token = authService.createToken(findUser);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: 1000 * maxAge });
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: 1000 * maxAge,
+      secure: true,
+      sameSite: "none",
+    });
     return res.status(200).json({ message: "Account found" });
   } catch (err) {
     next(err);
