@@ -25,7 +25,7 @@ const httpServer = createServer(app);
 // Initialize Socket.IO with CORS configuration
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:5173", "https://job-recruiter-gcjg.vercel.app/"],
+    origin: ["http://localhost:5173", "https://job-recruiter-gcjg.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -51,15 +51,40 @@ async function main() {
   await mongoose
     .connect(process.env.MONGODB)
     .then(() => console.log("[ ready ] Connected to MongoDB"));
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://job-recruiter-gcjg.vercel.app",
+    "job-recruiter-gcjg-git-main-ducluongs-projects-ade1dc6c.vercel.app",
+    "job-recruiter-gcjg-ou2riripz-ducluongs-projects-ade1dc6c.vercel.app",
+  ];
+
   app.use(
     cors({
-      origin: [
-        "http://localhost:5173",
-        "https://job-recruiter-gcjg.vercel.app/",
-      ],
+      origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       credentials: true,
     })
   );
+
+  app.options(
+    "*",
+    cors({
+      origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+    })
+  );
+
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
