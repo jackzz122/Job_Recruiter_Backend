@@ -54,8 +54,8 @@ async function main() {
   const allowedOrigins = [
     "http://localhost:5173",
     "https://job-recruiter-gcjg.vercel.app",
-    "job-recruiter-gcjg-git-main-ducluongs-projects-ade1dc6c.vercel.app",
-    "job-recruiter-gcjg-ou2riripz-ducluongs-projects-ade1dc6c.vercel.app",
+    "https://job-recruiter-gcjg-git-main-ducluongs-projects-ade1dc6c.vercel.app",
+    "https://job-recruiter-gcjg-ou2riripz-ducluongs-projects-ade1dc6c.vercel.app",
   ];
 
   app.use(
