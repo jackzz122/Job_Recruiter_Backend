@@ -12,7 +12,7 @@ class pendingApproveService {
       .find()
       .populate({ path: "accountID", select: "fullname email avatarIMG" });
 
-    if (pendingList.length === 0) {
+    if (!pendingList) {
       const error = new Error("Not found any pending list");
       error.status = 404;
       throw error;

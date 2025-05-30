@@ -4,7 +4,7 @@ class jobPostingService {
     const jobPosting = await jobPostingModel
       .find()
       .populate("companyId", "companyName logo status");
-    if (jobPosting.length === 0) {
+    if (!jobPosting) {
       const error = new Error("No job posting found");
       error.statusCode = 404;
       throw error;
@@ -43,7 +43,7 @@ class jobPostingService {
         select: "companyName logo",
       });
     console.log(jobPosting);
-    if (jobPosting.length === 0) {
+    if (!jobPosting) {
       const error = new Error("No job posting list found");
       error.statusCode = 404;
       throw error;

@@ -75,8 +75,9 @@ export const deleteReportInfo = async (req, res, next) => {
 export const deleteReportItem = async (req, res, next) => {
   try {
     const deletedReport = await reportService.deleteReportItem(
-      req.body.id,
-      req.body.targetType
+      req.body.reportId,
+      req.body.targetType,
+      req.body.reportTarget
     );
     const response = apiResponse.success(deletedReport, "Delete success");
     return res.status(response.status).json(response.body);

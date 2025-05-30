@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { RoleName } from "../models/account.model.js";
 import pendingApprove from "../models/pendingApprove.js";
 import nodemailer from "nodemailer";
+import company from "../models/companyInfor.model.js";
 import dotenv from "dotenv";
 dotenv.config();
 const maxAge = 3 * 24 * 60 * 60;

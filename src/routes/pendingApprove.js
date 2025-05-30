@@ -13,6 +13,7 @@ import {
   blockedAccount,
   blockedCompanyAccount,
   deleteAccount,
+  deleteCompanyAccount,
   getListRecruiterCompanyAccount,
   unBlockedCompanyAccount,
 } from "../controller/admin.controller.js";
@@ -75,8 +76,15 @@ router.delete(
   deleteAccount
 );
 router.delete(
+  "/api/deleteCompanyAccount/:companyId",
+  checkTokenAuthen,
+  checkRoles([RoleName.ADMIN]),
+  deleteCompanyAccount
+);
+router.delete(
   "/api/deletePendingApprove/:pendingItemsId",
   checkTokenAuthen,
-  checkRoles([RoleName.ADMIN], deletePendingItems)
+  checkRoles([RoleName.ADMIN]),
+  deletePendingItems
 );
 export default router;

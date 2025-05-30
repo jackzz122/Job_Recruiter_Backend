@@ -23,7 +23,7 @@ class commentService {
     const companyComments = await commentsModel
       .find({ company_id: companyId })
       .populate("account_id");
-    if (companyComments.length === 0) {
+    if (!companyComments) {
       const err = new Error("Comment list not found");
       err.status = 404;
       throw err;

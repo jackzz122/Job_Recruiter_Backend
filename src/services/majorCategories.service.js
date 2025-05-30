@@ -3,7 +3,7 @@ import majorCategories from "../models/majorCatergories.model.js";
 class majorCategoriesService {
   async getMajorCategories() {
     const listMajor = await majorCategories.find();
-    if (listMajor.length === 0) {
+    if (!listMajor) {
       const error = new Error("Major list not found");
       error.status = 404;
       throw error;
@@ -13,7 +13,7 @@ class majorCategoriesService {
 
   async getNameMajors() {
     const listMajorName = await majorCategories.distinct("name");
-    if (listMajorName.length === 0) {
+    if (!listMajorName) {
       const error = new Error("No major name category");
       error.status = 404;
       throw error;
@@ -23,7 +23,7 @@ class majorCategoriesService {
 
   async getMajorLevels() {
     const listMajorLevel = await majorCategories.distinct("level");
-    if (listMajorLevel.length === 0) {
+    if (!listMajorLevel) {
       const error = new Error("No major level category");
       error.status = 404;
       throw error;

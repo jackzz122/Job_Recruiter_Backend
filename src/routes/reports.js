@@ -50,7 +50,7 @@ router.delete(
   deleteReportInfo
 );
 router.delete(
-  "/api/deleteReportItem/:reportId",
+  "/api/deleteReportItem",
   checkTokenAuthen,
   checkRoles([RoleName.ADMIN]),
   deleteReportItem

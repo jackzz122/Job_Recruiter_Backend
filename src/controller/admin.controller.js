@@ -59,6 +59,20 @@ export const unBlockedCompanyAccount = async (req, res, next) => {
     next(err);
   }
 };
+export const deleteUserAccount = async (req, res, next) => {};
+export const deleteCompanyAccount = async (req, res, next) => {
+  try {
+    const companyId = req.params.companyId;
+    const deletedCompany = await adminService.deleteCompanyAccount(companyId);
+    const response = apiResponse.success(
+      deletedCompany,
+      "Company deleted successfully"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 export const getListRecruiterCompanyAccount = async (req, res, next) => {
   try {
     const listRecruiterCompanyAccount =

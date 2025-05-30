@@ -13,7 +13,7 @@ class reportService {
       .populate("reportTarget")
       .lean();
 
-    if (reportList.length === 0) {
+    if (!reportList) {
       const error = new Error("No report list found");
       error.status = 404;
       throw error;
@@ -27,7 +27,6 @@ class reportService {
       })
       .populate("accountId", "fullname email")
       .populate("target_id", "fullname email");
-    console.log(findReport);
     if (!findReport) {
       const error = new Error("Report not found");
       error.status = 404;
@@ -79,6 +78,7 @@ class reportService {
   }
   async createReport(data, userId) {
     const findReport = await reportModel.findOne({
+      accountId: userId,
       reportTarget: data.reportTarget,
     });
 
@@ -176,35 +176,74 @@ class reportService {
     }
     return true;
   }
-  async deleteReportItem(reportId) {
-    if (reportId.targetType === TargetType.JOB) {
-      const findJob = await jobPostingModel.deleteOne({ _id: reportId.id });
-      if (findJob.deletedCount === 0) {
-        const error = new Error("Job not found");
-        error.status = 404;
-        throw error;
-      }
-      return findJob;
+  async deleteReportItem(reportId, targetType, reportTarget) {
+    try {
+      // Start a session for transaction
+      const session = await reportModel.startSession();
+      let result;
+
+      await session.withTransaction(async () => {
+        // Delete the report
+        const report = await reportModel.deleteOne(
+          { _id: reportId },
+          { session }
+        );
+        if (report.deletedCount === 0) {
+          throw new Error("Report not found");
+        }
+
+        // Delete the target item based on type
+        switch (targetType) {
+          case TargetType.JOB:
+            // First delete the job posting
+            const findJob = await jobPostingModel.deleteOne(
+              { _id: reportTarget },
+              { session }
+            );
+            if (findJob.deletedCount === 0) {
+              throw new Error("Job not found");
+            }
+
+            // Then delete all reports targeting the same job
+            const deletedReports = await reportModel.deleteMany(
+              {
+                reportTarget: reportTarget,
+                target_type: TargetType.JOB,
+                _id: { $ne: reportId }, // Exclude the already deleted report
+              },
+              { session }
+            );
+
+            result = {
+              type: "job",
+              deleted: true,
+              jobDeleted: true,
+              additionalReportsDeleted: deletedReports.deletedCount,
+            };
+            break;
+
+          case TargetType.COMMENT:
+            const findComment = await commentModel.deleteOne(
+              { _id: reportTarget },
+              { session }
+            );
+            if (findComment.deletedCount === 0) {
+              throw new Error("Comment not found");
+            }
+            result = { type: "comment", deleted: true };
+            break;
+          case TargetType.COMPANY:
+            return { type: "company", deleted: true };
+          default:
+            throw new Error("Invalid target type");
+        }
+      });
+
+      return result;
+    } catch (error) {
+      error.status = error.status || 500;
+      throw error;
     }
-    if (reportId.targetType === TargetType.COMMENT) {
-      const findComment = await commentModel.deleteOne({ _id: reportId.id });
-      if (findComment.deletedCount === 0) {
-        const error = new Error("Comment not found");
-        error.status = 404;
-        throw error;
-      }
-      return findComment;
-    }
-    if (reportId.targetType === TargetType.COMPANY) {
-      const findCompany = await companyModel.deleteOne({ _id: reportId.id });
-      if (findCompany.deletedCount === 0) {
-        const error = new Error("Company not found");
-        error.status = 404;
-        throw error;
-      }
-      return findCompany;
-    }
-    return false;
   }
 }
 
