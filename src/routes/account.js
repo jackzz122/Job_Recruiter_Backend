@@ -13,6 +13,7 @@ import {
   resetPassword,
   updateUser,
   userLogOut,
+  UserSearch,
   verifyCode,
 } from "../controller/account.controller.js";
 import { checkTokenAuthen } from "../middleware/checkTokenAuthen.js";
@@ -50,6 +51,12 @@ router.get(
   getAppliedJobList
 );
 router.post("/api/login", checkSchema(accountValidator), loginForUser);
+router.get(
+  "/api/search",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  UserSearch
+);
 //! Login for Recruiter
 router.delete(
   "/api/removeCV",

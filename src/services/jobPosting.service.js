@@ -42,7 +42,6 @@ class jobPostingService {
         path: "companyId",
         select: "companyName logo",
       });
-    console.log(jobPosting);
     if (!jobPosting) {
       const error = new Error("No job posting list found");
       error.statusCode = 404;
@@ -82,5 +81,53 @@ class jobPostingService {
     return deletedJob;
   }
 }
+export const searchJobPosting = async (jobId) => {
+  const jobPosting = await jobPostingModel.findById(jobId);
+  if (!jobPosting) {
+    const error = new Error("Job posting not found");
+    error.statusCode = 404;
+    throw error;
+  }
+};
+
+// Simple search function
+export const searchJobs = async (filters) => {
+  // Create a simple query object
+  const query = {
+    status: "ongoing", // Only show active jobs
+  };
+
+  // If experience level is provided, add it to query
+  if (filters.experience) {
+    query.experience = filters.experience;
+  }
+
+  // If salary range is provided, add it to query
+  if (filters.minSalary) {
+    query.minRange = { $gte: filters.minSalary };
+  }
+  if (filters.maxSalary) {
+    query.maxRange = { $lte: filters.maxSalary };
+  }
+
+  // If number of people hiring is provided, add it to query
+  if (filters.peopleHiring) {
+    query.sizingPeople = filters.peopleHiring;
+  }
+
+  // Find jobs matching the query
+  const jobs = await jobPostingModel
+    .find(query)
+    .populate("companyId", "companyName logo status")
+    .sort({ createdAt: -1 });
+
+  if (!jobs.length) {
+    const error = new Error("No jobs found matching your criteria");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return jobs;
+};
 
 export default new jobPostingService();

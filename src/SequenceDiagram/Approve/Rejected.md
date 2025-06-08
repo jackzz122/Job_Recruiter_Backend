@@ -24,7 +24,4 @@ sequenceDiagram
         B->>E: sendEmail(candidate, "rejected")
         E-->>UI: Display sent success
     end
-
-
-
 ```

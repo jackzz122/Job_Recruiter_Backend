@@ -26,6 +26,29 @@ export const getCandidateFromJobPosting = async (req, res, next) => {
     next(err);
   }
 };
+export const JobPostingSearch = async (req, res, next) => {
+  try {
+    const filters = {
+      experience: req.query.experience
+        ? Number(req.query.experience)
+        : undefined,
+      minSalary: req.query.minSalary ? Number(req.query.minSalary) : undefined,
+      maxSalary: req.query.maxSalary ? Number(req.query.maxSalary) : undefined,
+      peopleHiring: req.query.peopleHiring
+        ? Number(req.query.peopleHiring)
+        : undefined,
+    };
+    console.log(filters);
+    const searchResults = await jobPostingService.searchJobs(filters);
+    const response = apiResponse.success(
+      searchResults,
+      "Search jobs successful"
+    );
+    return res.status(response.status).json(response.body);
+  } catch (err) {
+    next(err);
+  }
+};
 export const searchJobPosting = async (req, res, next) => {
   try {
     const searchJobPosting = await jobPostingService.searchJobPosting(

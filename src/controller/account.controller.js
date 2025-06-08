@@ -105,7 +105,7 @@ export const logout = async (req, res, next) => {
     next(err);
   }
 };
-
+export const UserSearch = async (req, res, next) => {};
 export const loginForUser = async (req, res, next) => {
   try {
     const { isValid, errors, validData } = validateRequest(req);

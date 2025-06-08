@@ -195,6 +195,11 @@ class candidateService {
       throw error;
     }
 
+    let companyInfo = null;
+    if (findUser.companyId) {
+      companyInfo = await company.findOne({ _id: findUser.companyId });
+    }
+    console.log(companyInfo);
     let avatarUploadError = null;
     if (file) {
       try {
@@ -236,11 +241,25 @@ class candidateService {
           } else findUser[key].push(value);
         } else {
           findUser[key] = value;
+
+          if (
+            findUser.role === RoleName.Recruit &&
+            companyInfo &&
+            key === "phone" &&
+            value &&
+            typeof value === "string" &&
+            value.trim() !== ""
+          ) {
+            companyInfo.phoneNumber = value;
+          }
         }
       });
     }
 
     await findUser.save();
+    if (findUser.role === RoleName.Recruit && companyInfo) {
+      await companyInfo.save();
+    }
     return { user: findUser, avatarUploadError };
   }
 

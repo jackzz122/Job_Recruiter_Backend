@@ -8,6 +8,7 @@ import {
   getCandidateFromJobPosting,
   getJobPostingList,
   getPostingDetails,
+  JobPostingSearch,
   removeApplicants,
   updateJobPosting,
 } from "../controller/jobPosting.controller.js";
@@ -24,6 +25,12 @@ const router = express.Router();
 //   checkRoles(["admin"]),
 //   getAllJobPostings
 // );
+router.get(
+  "/api/searchJobPosting",
+  checkTokenAuthen,
+  checkRoles([RoleName.GUEST]),
+  JobPostingSearch
+);
 router.get(
   "/api/getAllJobPosting",
   checkTokenAuthen,

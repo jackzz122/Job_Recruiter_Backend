@@ -7,7 +7,7 @@ sequenceDiagram
     participant CDN as Cloudinary
 
     C->>U: Navigate to profile management
-    U->>S: getProfile(candidateId)
+    U->>S: getProfile()
     S-->>U: Return profile info
     U-->>C: Display profile info
 

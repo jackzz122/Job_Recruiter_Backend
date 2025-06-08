@@ -25,6 +25,7 @@ const jobPostingSchema = new mongoose.Schema({
     required: true,
     min: 1,
     max: 100,
+    index: true,
   },
   companyId: {
     type: ObjectId,
@@ -37,10 +38,12 @@ const jobPostingSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 1,
+    index: true,
   },
   maxRange: {
     type: Number,
     required: true,
+    index: true,
   },
   description: {
     type: {
@@ -99,6 +102,7 @@ const jobPostingSchema = new mongoose.Schema({
   experience: {
     type: Number,
     required: true,
+    index: true,
   },
   applicationDeadline: {
     type: Date,
@@ -113,4 +117,7 @@ const jobPostingSchema = new mongoose.Schema({
     default: () => Date.now(),
   },
 });
+
+jobPostingSchema.index({ minRange: 1, maxRange: 1 });
+
 export default mongoose.model("jobPosting", jobPostingSchema);
