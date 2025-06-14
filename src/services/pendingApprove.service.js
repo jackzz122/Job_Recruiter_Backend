@@ -51,7 +51,7 @@ class pendingApproveService {
         // Step 4: Update user information
         findUser.role = RoleName.Recruit;
         findUser.companyId = newCompany._id;
-        findUser.phone = companyData.phone;
+        findUser.phone = companyData.phoneNumber;
         await findUser.save();
 
         // Step 5: Send email notification
